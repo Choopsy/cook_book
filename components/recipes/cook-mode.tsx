@@ -1,10 +1,10 @@
-'use client'
+use client'
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { X, ChevronLeft, ChevronRight, Check, Minus, Plus, ChefHat } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { IngredientGroup, Step } from '@/lib/types'
+import type { Ingredient, IngredientGroup, Step } from '@/lib/types'
 
 type Phase = 'checklist' | 'cooking' | 'done'
 
@@ -14,6 +14,20 @@ interface Props {
   baseServings: number
   groups: IngredientGroup[]
   steps: Step[]
+}
+
+function normalize(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, '')
+}
+
+function matchIngredients(stepContent: string, allIngredients: Ingredient[]): Ingredient[] {
+  const normalizedStep = normalize(stepContent)
+  return allIngredients.filter((ing) => {
+    const normalizedName = normalize(ing.name)
+    const words = normalizedName.split(/\s+/).filter((w) => w.length > 2)
+    if (words.length === 0) return normalizedStep.includes(normalizedName)
+    return words.some((word) => normalizedStep.includes(word))
+  })
 }
 
 function fmtAmount(value: number): string {
@@ -220,6 +234,8 @@ function StepScreen({
   onNext,
   onPrev,
   recipeId,
+  allIngredients,
+  ratio,
 }: {
   step: Step
   stepIndex: number
@@ -227,10 +243,13 @@ function StepScreen({
   onNext: () => void
   onPrev: () => void
   recipeId: string
+  allIngredients: Ingredient[]
+  ratio: number
 }) {
   const progress = ((stepIndex + 1) / totalSteps) * 100
   const isLast = stepIndex === totalSteps - 1
   const touchStartX = useRef(0)
+  const matched = matchIngredients(step.content, allIngredients)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
@@ -284,6 +303,33 @@ function StepScreen({
         <p className="text-2xl leading-relaxed font-medium">
           {step.content}
         </p>
+
+        {/* Ingrédients détectés */}
+        {matched.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Ingrédients
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {matched.map((ing) => (
+                <div
+                  key={ing.id}
+                  className="flex items-baseline gap-1.5 px-3 py-2 rounded-xl bg-muted text-sm"
+                >
+                  {ing.amount != null && (
+                    <span className="font-bold tabular-nums">
+                      {fmtAmount(ing.amount * ratio)}
+                    </span>
+                  )}
+                  {ing.unit && (
+                    <span className="text-muted-foreground text-xs">{ing.unit}</span>
+                  )}
+                  <span className="font-medium">{ing.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Image */}
         {step.image_url && (
@@ -340,7 +386,9 @@ export function CookMode({ recipeId, title, baseServings, groups, steps }: Props
   const [servings, setServings] = useState(baseServings)
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set())
 
-  const allIds = groups.flatMap((g) => g.ingredients.map((i) => i.id))
+  const allIngredients = groups.flatMap((g) => g.ingredients)
+  const allIds = allIngredients.map((i) => i.id)
+  const ratio = servings / baseServings
 
   const handleToggle = (id: string) => {
     setCheckedIds((prev) => {
@@ -397,6 +445,8 @@ export function CookMode({ recipeId, title, baseServings, groups, steps }: Props
       stepIndex={stepIndex}
       totalSteps={steps.length}
       recipeId={recipeId}
+      allIngredients={allIngredients}
+      ratio={ratio}
       onNext={() => {
         if (stepIndex < steps.length - 1) setStepIndex((i) => i + 1)
         else setPhase('done')
