@@ -17,6 +17,7 @@ export async function inviteUser(formData: FormData) {
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name },
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=invite`,
   })
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`)
   redirect(`/admin?message=${encodeURIComponent(`Invitation envoyée à ${email}`)}`)
