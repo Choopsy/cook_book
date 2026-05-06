@@ -1,0 +1,81 @@
+export type Difficulty = 'easy' | 'medium' | 'hard'
+
+export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  easy: 'Facile',
+  medium: 'Moyen',
+  hard: 'Difficile',
+}
+
+export interface Category {
+  id: string
+  author_id: string
+  name: string
+  is_public: boolean
+  cover_image_url: string | null
+  created_at: string
+}
+
+export interface Tag {
+  id: string
+  name: string
+  color: string | null
+}
+
+export interface Ingredient {
+  id: string
+  name: string
+  amount: number | null
+  unit: string | null
+  position: number
+}
+
+export interface IngredientGroup {
+  id: string
+  name: string
+  position: number
+  ingredients: Ingredient[]
+}
+
+export interface Step {
+  id: string
+  position: number
+  content: string
+  image_url: string | null
+}
+
+export interface RecipeSummary {
+  id: string
+  title: string
+  description: string | null
+  cover_image_url: string | null
+  prep_time_min: number | null
+  cook_time_min: number | null
+  base_servings: number | null
+  difficulty: Difficulty | null
+  category_id: string | null
+  created_at: string
+  tags: Tag[]
+}
+
+export interface RecipeDetail extends RecipeSummary {
+  author_id: string
+  ingredient_groups: IngredientGroup[]
+  steps: Step[]
+}
+
+export interface CreateRecipeInput {
+  title: string
+  description: string
+  cover_image_url: string
+  prep_time_min: number | null
+  cook_time_min: number | null
+  base_servings: number
+  difficulty: Difficulty
+  category_id: string | null
+  tag_ids: string[]
+  groups: {
+    name: string
+    ingredients: { name: string; amount: number | null; unit: string }[]
+  }[]
+  steps: { content: string; image_url: string }[]
+}
