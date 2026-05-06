@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Heart, PlusCircle, Settings, ChefHat, BookOpen, FolderPlus } from 'lucide-react'
+import { Home, Heart, PlusCircle, Settings, ChefHat, BookOpen, FolderPlus, User } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { NewItemSheet } from './new-item-sheet'
 
 interface Props {
   isAdmin: boolean
+  avatarUrl: string | null
+  fullName: string | null
 }
 
 const BASE_ITEMS = [
@@ -16,7 +18,7 @@ const BASE_ITEMS = [
   { href: '/favorites', icon: Heart, label: 'Favoris' },
 ]
 
-export function NavContent({ isAdmin }: Props) {
+export function NavContent({ isAdmin, avatarUrl, fullName }: Props) {
   const pathname = usePathname()
 
   const items = [...BASE_ITEMS]
@@ -56,6 +58,17 @@ export function NavContent({ isAdmin }: Props) {
           </Link>
         </div>
 
+        <Link href="/profile">
+          <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={fullName ?? ''} className="h-8 w-8 rounded-full object-cover border border-border" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center border border-border">
+                <User className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        </Link>
         <form action={signOut}>
           <Button variant="ghost" size="sm" type="submit" className="text-muted-foreground text-xs shrink-0">
             Déconnexion
@@ -84,6 +97,14 @@ export function NavContent({ isAdmin }: Props) {
           )
         })}
         <NewItemSheet />
+        <Link href="/profile" className="flex flex-col items-center gap-0.5 flex-1 py-2">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+          ) : (
+            <User className={`h-5 w-5 transition-colors ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`} strokeWidth={isActive('/profile') ? 2.5 : 1.5} />
+          )}
+          <span className={`text-[10px] font-medium transition-colors ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>Profil</span>
+        </Link>
         {isAdmin && (
           <Link href="/admin" className="flex flex-col items-center gap-0.5 flex-1 py-2">
             <Settings
