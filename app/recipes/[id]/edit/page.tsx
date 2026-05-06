@@ -53,7 +53,7 @@ export default async function EditRecipePage({ params }: Props) {
 
   return (
     <div className="min-h-svh">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b px-2 py-2 flex items-center gap-2">
+      <header className="sticky top-0 md:top-14 z-10 bg-background/80 backdrop-blur-sm border-b px-2 py-2 flex items-center gap-2">
         <Link href={`/recipes/${id}`}>
           <Button variant="ghost" size="icon" className="h-9 w-9">
             <ArrowLeft className="h-4 w-4" />

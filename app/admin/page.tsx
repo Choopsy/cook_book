@@ -24,7 +24,7 @@ export default async function AdminPage({ searchParams }: Props) {
 
   return (
     <div className="min-h-svh pb-8">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b px-4 py-3">
+      <header className="sticky top-0 md:top-14 z-10 bg-background/80 backdrop-blur-sm border-b px-4 py-3">
         <h1 className="font-semibold">Administration</h1>
       </header>
 
