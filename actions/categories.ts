@@ -1,7 +1,15 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+
+async function getDb() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.email === process.env.ADMIN_EMAIL
+  return { supabase: isAdmin ? createAdminClient() : supabase, user }
+}
 
 export async function createCategory(formData: FormData) {
   const supabase = await createClient()
@@ -31,8 +39,7 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(id: string, formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { supabase, user } = await getDb()
   if (!user) redirect('/login')
 
   const name = (formData.get('name') as string)?.trim()
@@ -51,7 +58,8 @@ export async function updateCategory(id: string, formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
-  const supabase = await createClient()
+  const { supabase, user } = await getDb()
+  if (!user) redirect('/login')
   const { error } = await supabase.from('categories').delete().eq('id', id)
   if (error) return { error: error.message }
   redirect('/')

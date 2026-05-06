@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { CategoryForm } from '@/components/categories/category-form'
 import type { Category } from '@/lib/types'
@@ -13,8 +14,11 @@ interface Props {
 export default async function EditCategoryPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.email === process.env.ADMIN_EMAIL
+  const db = isAdmin ? createAdminClient() : supabase
 
-  const { data } = await supabase
+  const { data } = await db
     .from('categories')
     .select('id, author_id, name, is_public, cover_image_url, created_at')
     .eq('id', id)

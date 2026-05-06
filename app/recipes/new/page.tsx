@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { RecipeForm } from '@/components/recipes/recipe-form'
 import type { Tag, Category } from '@/lib/types'
@@ -13,22 +14,22 @@ export default async function NewRecipePage({ searchParams }: Props) {
   const { category } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.email === process.env.ADMIN_EMAIL
+  const db = isAdmin ? createAdminClient() : supabase
 
-  const [{ data: tags }, { data: profile }, { data: ownCats }, { data: publicCats }] = await Promise.all([
+  const allCatsQuery = db.from('categories')
+    .select('id, author_id, name, is_public, cover_image_url, created_at').order('name')
+
+  const [{ data: tags }, { data: profile }, { data: allCats }] = await Promise.all([
     supabase.from('tags').select('id, name, color').order('name'),
     supabase.from('profiles').select('can_contribute').eq('id', user?.id ?? '').maybeSingle(),
-    supabase.from('categories').select('id, author_id, name, is_public, cover_image_url, created_at')
-      .eq('author_id', user?.id ?? '').order('name'),
-    supabase.from('categories').select('id, author_id, name, is_public, cover_image_url, created_at')
-      .eq('is_public', true).order('name'),
+    isAdmin ? allCatsQuery : allCatsQuery.or(`author_id.eq.${user?.id ?? ''},is_public.eq.true`),
   ])
 
   const canContribute = profile?.can_contribute ?? false
-  const seenIds = new Set((ownCats ?? []).map((c) => c.id))
-  const categories = [
-    ...(ownCats ?? []),
-    ...(canContribute ? (publicCats ?? []).filter((c) => !seenIds.has(c.id)) : []),
-  ]
+  const categories = isAdmin
+    ? (allCats ?? [])
+    : (allCats ?? []).filter((c) => c.author_id === user?.id || (c.is_public && canContribute))
 
   return (
     <div className="min-h-svh">
