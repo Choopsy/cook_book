@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Users, Pencil, ChefHat } from 'lucide-react'
+import { ArrowLeft, Clock, Users, Pencil, ChefHat, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,6 +28,7 @@ export default async function RecipeDetailPage({ params }: Props) {
         id, title, description, cover_image_url,
         prep_time_min, cook_time_min, base_servings, difficulty, category_id, created_at, author_id,
         recipe_tags ( tags ( id, name, color ) ),
+        profiles ( full_name, avatar_url ),
         ingredient_groups (
           id, name, position,
           ingredients ( id, name, amount, unit, position )
@@ -56,9 +57,12 @@ export default async function RecipeDetailPage({ params }: Props) {
   if (!raw) notFound()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawAny = raw as any
+  const author = rawAny.profiles ?? null
   const recipe: RecipeDetail = {
     ...raw,
     tags: (raw.recipe_tags as any[]).map((rt) => rt.tags).filter(Boolean),
+    author,
     ingredient_groups: (raw.ingredient_groups as any[])
       .sort((a, b) => a.position - b.position)
       .map((g) => ({
@@ -111,6 +115,19 @@ export default async function RecipeDetailPage({ params }: Props) {
         {/* Titre & méta */}
         <div className="space-y-3">
           <h1 className="text-2xl font-bold leading-tight">{recipe.title}</h1>
+
+          {author && (
+            <div className="flex items-center gap-2">
+              {author.avatar_url ? (
+                <img src={author.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+              )}
+              <span className="text-sm text-muted-foreground">{author.full_name ?? 'Anonyme'}</span>
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-2">
             {recipe.difficulty && <DifficultyBadge difficulty={recipe.difficulty} />}

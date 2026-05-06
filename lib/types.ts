@@ -43,6 +43,11 @@ export interface Step {
   image_url: string | null
 }
 
+export interface RecipeAuthor {
+  full_name: string | null
+  avatar_url: string | null
+}
+
 export interface RecipeSummary {
   id: string
   title: string
@@ -55,6 +60,7 @@ export interface RecipeSummary {
   category_id: string | null
   created_at: string
   tags: Tag[]
+  author: RecipeAuthor | null
 }
 
 export interface RecipeDetail extends RecipeSummary {
