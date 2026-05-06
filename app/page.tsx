@@ -64,7 +64,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-svh pb-24">
-      <header className="sticky top-0 md:top-14 z-10 bg-background/80 backdrop-blur-sm border-b px-4 py-3 flex items-center justify-between">
+      <header className="md:hidden sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ChefHat className="h-5 w-5 text-primary" />
           <span className="font-bold">Carnet de famille</span>
