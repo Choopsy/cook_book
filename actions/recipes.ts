@@ -17,6 +17,27 @@ export async function createRecipe(input: CreateRecipeInput) {
     { onConflict: 'id', ignoreDuplicates: true },
   )
 
+  let categoryId = input.category_id || null
+  if (!categoryId) {
+    const { data: existing } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('author_id', user.id)
+      .eq('name', 'Mes recettes')
+      .maybeSingle()
+
+    if (existing) {
+      categoryId = existing.id
+    } else {
+      const { data: created } = await supabase
+        .from('categories')
+        .insert({ author_id: user.id, name: 'Mes recettes', is_public: false })
+        .select('id')
+        .single()
+      categoryId = created?.id ?? null
+    }
+  }
+
   const { data: recipe, error } = await supabase
     .from('recipes')
     .insert({
@@ -28,7 +49,7 @@ export async function createRecipe(input: CreateRecipeInput) {
       cook_time_min: input.cook_time_min,
       base_servings: input.base_servings,
       difficulty: input.difficulty,
-      category_id: input.category_id,
+      category_id: categoryId,
     })
     .select('id')
     .single()

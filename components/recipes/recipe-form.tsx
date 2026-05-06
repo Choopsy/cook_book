@@ -393,7 +393,7 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
       </section>
 
       {/* Barre d'actions fixe */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-sm border-t px-4 py-3 flex gap-3 max-w-2xl mx-auto">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-t px-4 py-3 flex gap-3 max-w-2xl mx-auto">
         {initialData && (
           <>
             <Button
