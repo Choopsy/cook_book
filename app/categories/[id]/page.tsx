@@ -48,7 +48,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       id, title, description, cover_image_url,
       prep_time_min, cook_time_min, base_servings, difficulty, category_id, created_at,
       recipe_tags ( tags ( id, name, color ) ),
-      profiles ( full_name, avatar_url )
+      profiles!author_id ( full_name, avatar_url )
     `)
     .order('created_at', { ascending: false })
 

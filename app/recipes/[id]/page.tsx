@@ -28,7 +28,7 @@ export default async function RecipeDetailPage({ params }: Props) {
         id, title, description, cover_image_url,
         prep_time_min, cook_time_min, base_servings, difficulty, category_id, created_at, author_id,
         recipe_tags ( tags ( id, name, color ) ),
-        profiles ( full_name, avatar_url ),
+        profiles!author_id ( full_name, avatar_url ),
         ingredient_groups (
           id, name, position,
           ingredients ( id, name, amount, unit, position )
