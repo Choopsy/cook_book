@@ -260,7 +260,7 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
               </a>
             </p>
           ) : (
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select value={categoryId} onValueChange={(v) => setCategoryId(v ?? '')}>
               <SelectTrigger>
                 <SelectValue placeholder="Choisir une catégorie..." />
               </SelectTrigger>
