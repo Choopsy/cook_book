@@ -341,7 +341,7 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
                   />
                   <Input value={ing.amount} onChange={(e) => setIngField(group.id, ing.id, 'amount', e.target.value)}
                     placeholder="200" className="h-8 text-sm text-center px-1" type="number" min={0} step="any" />
-                  <Select value={ing.unit} onValueChange={(v) => setIngField(group.id, ing.id, 'unit', v)}>
+                  <Select value={ing.unit} onValueChange={(v) => setIngField(group.id, ing.id, 'unit', v ?? '')}>
                     <SelectTrigger className="h-8 text-xs px-1">
                       <SelectValue placeholder="—" />
                     </SelectTrigger>
