@@ -19,10 +19,7 @@ const BASE_ITEMS = [
 export function NavContent({ isAdmin }: Props) {
   const pathname = usePathname()
 
-  const items = [
-    ...BASE_ITEMS,
-    ...(isAdmin ? [{ href: '/admin', icon: Settings, label: 'Admin' }] : []),
-  ]
+  const items = [...BASE_ITEMS]
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
