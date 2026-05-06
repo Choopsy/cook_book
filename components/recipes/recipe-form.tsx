@@ -214,7 +214,7 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
         </div>
         <div className="space-y-2">
           <Label>Image de couverture</Label>
-          <ImagePicker value={coverUrl} onChange={setCoverUrl} />
+          <ImagePicker value={coverUrl} onChange={setCoverUrl} compact />
         </div>
       </section>
 
@@ -325,14 +325,14 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
             </div>
 
             <div className="space-y-1.5">
-              <div className="grid grid-cols-[1fr_4rem_4rem_2rem] gap-1 px-0.5">
+              <div className="grid grid-cols-[1fr_3.5rem_5rem_2rem] gap-1 px-0.5">
                 <span className="text-[10px] text-muted-foreground">Ingrédient</span>
                 <span className="text-[10px] text-muted-foreground text-center">Qté</span>
                 <span className="text-[10px] text-muted-foreground text-center">Unité</span>
                 <span />
               </div>
               {group.ingredients.map((ing) => (
-                <div key={ing.id} className="grid grid-cols-[1fr_4rem_4rem_2rem] gap-1 items-center">
+                <div key={ing.id} className="grid grid-cols-[1fr_3.5rem_5rem_2rem] gap-1 items-center">
                   <IngredientAutocomplete
                     value={ing.name}
                     onChange={(v) => setIngField(group.id, ing.id, 'name', v)}
@@ -341,8 +341,16 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
                   />
                   <Input value={ing.amount} onChange={(e) => setIngField(group.id, ing.id, 'amount', e.target.value)}
                     placeholder="200" className="h-8 text-sm text-center px-1" type="number" min={0} step="any" />
-                  <Input value={ing.unit} onChange={(e) => setIngField(group.id, ing.id, 'unit', e.target.value)}
-                    placeholder="g" className="h-8 text-sm text-center px-1" />
+                  <Select value={ing.unit} onValueChange={(v) => setIngField(group.id, ing.id, 'unit', v)}>
+                    <SelectTrigger className="h-8 text-xs px-1">
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['g','kg','mg','ml','cl','dl','L','c.c','c.s','tasse','verre','pincée','sachet','yaourt','botte','tranche','feuille','gousse','brin',''].map((u) => (
+                        <SelectItem key={u || '__none__'} value={u}>{u || '—'}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive"
                     onClick={() => removeIngredient(group.id, ing.id)} disabled={group.ingredients.length === 1}>
                     <Trash2 className="h-3.5 w-3.5" />
@@ -383,7 +391,7 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
             <ImagePicker
               value={step.image_url}
               onChange={(url) => setStepField(step.id, 'image_url', url)}
-              aspectRatio="square"
+              compact
             />
           </div>
         ))}

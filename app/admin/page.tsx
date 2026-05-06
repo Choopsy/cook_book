@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { InviteForm } from '@/components/admin/invite-form'
 import { DeleteUserButton } from '@/components/admin/delete-user-button'
+import { ContributeToggle } from '@/components/admin/contribute-toggle'
 
 interface Props {
   searchParams: Promise<{ error?: string; message?: string }>
@@ -16,7 +17,12 @@ export default async function AdminPage({ searchParams }: Props) {
   if (!user || user.email !== process.env.ADMIN_EMAIL) notFound()
 
   const admin = createAdminClient()
-  const { data: { users } } = await admin.auth.admin.listUsers()
+  const [{ data: { users } }, { data: profiles }] = await Promise.all([
+    admin.auth.admin.listUsers(),
+    supabase.from('profiles').select('id, can_contribute'),
+  ])
+
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]))
 
   const sorted = [...users].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
@@ -60,12 +66,19 @@ export default async function AdminPage({ searchParams }: Props) {
                     <p className="text-sm text-muted-foreground truncate">{u.email}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {isAdmin && (
+                    {isAdmin ? (
                       <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                         admin
                       </span>
+                    ) : (
+                      <>
+                        <ContributeToggle
+                          userId={u.id}
+                          canContribute={profileMap.get(u.id)?.can_contribute ?? false}
+                        />
+                        <DeleteUserButton userId={u.id} name={name} />
+                      </>
                     )}
-                    {!isAdmin && <DeleteUserButton userId={u.id} name={name} />}
                   </div>
                 </li>
               )

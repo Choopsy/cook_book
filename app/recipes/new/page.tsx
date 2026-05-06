@@ -14,12 +14,21 @@ export default async function NewRecipePage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: tags }, { data: categories }] = await Promise.all([
+  const [{ data: tags }, { data: profile }, { data: ownCats }, { data: publicCats }] = await Promise.all([
     supabase.from('tags').select('id, name, color').order('name'),
+    supabase.from('profiles').select('can_contribute').eq('id', user?.id ?? '').maybeSingle(),
     supabase.from('categories').select('id, author_id, name, is_public, cover_image_url, created_at')
-      .eq('author_id', user?.id ?? '')
-      .order('name'),
+      .eq('author_id', user?.id ?? '').order('name'),
+    supabase.from('categories').select('id, author_id, name, is_public, cover_image_url, created_at')
+      .eq('is_public', true).order('name'),
   ])
+
+  const canContribute = profile?.can_contribute ?? false
+  const seenIds = new Set((ownCats ?? []).map((c) => c.id))
+  const categories = [
+    ...(ownCats ?? []),
+    ...(canContribute ? (publicCats ?? []).filter((c) => !seenIds.has(c.id)) : []),
+  ]
 
   return (
     <div className="min-h-svh">

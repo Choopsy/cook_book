@@ -29,3 +29,10 @@ export async function deleteUser(userId: string) {
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`)
   redirect('/admin')
 }
+
+export async function toggleContribute(userId: string, current: boolean) {
+  await assertAdmin()
+  const supabase = await createClient()
+  await supabase.from('profiles').update({ can_contribute: !current }).eq('id', userId)
+  redirect('/admin')
+}

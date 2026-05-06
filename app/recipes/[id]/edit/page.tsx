@@ -15,7 +15,7 @@ export default async function EditRecipePage({ params }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: raw }, { data: tags }, { data: categories }] = await Promise.all([
+  const [{ data: raw }, { data: tags }, { data: profile }, { data: ownCats }, { data: publicCats }] = await Promise.all([
     supabase
       .from('recipes')
       .select(`
@@ -31,10 +31,19 @@ export default async function EditRecipePage({ params }: Props) {
       .eq('id', id)
       .single(),
     supabase.from('tags').select('id, name, color').order('name'),
+    supabase.from('profiles').select('can_contribute').eq('id', user?.id ?? '').maybeSingle(),
     supabase.from('categories').select('id, author_id, name, is_public, cover_image_url, created_at')
-      .eq('author_id', user?.id ?? '')
-      .order('name'),
+      .eq('author_id', user?.id ?? '').order('name'),
+    supabase.from('categories').select('id, author_id, name, is_public, cover_image_url, created_at')
+      .eq('is_public', true).order('name'),
   ])
+
+  const canContribute = profile?.can_contribute ?? false
+  const seenIds = new Set((ownCats ?? []).map((c) => c.id))
+  const categories = [
+    ...(ownCats ?? []),
+    ...(canContribute ? (publicCats ?? []).filter((c) => !seenIds.has(c.id)) : []),
+  ]
 
   if (!raw || !user || user.id !== raw.author_id) notFound()
 

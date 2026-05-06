@@ -8,9 +8,10 @@ interface Props {
   value: string
   onChange: (url: string) => void
   aspectRatio?: 'video' | 'square'
+  compact?: boolean
 }
 
-export function ImagePicker({ value, onChange, aspectRatio = 'video' }: Props) {
+export function ImagePicker({ value, onChange, aspectRatio = 'video', compact = false }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,6 +41,34 @@ export function ImagePicker({ value, onChange, aspectRatio = 'video' }: Props) {
 
   const aspectClass = aspectRatio === 'video' ? 'aspect-video' : 'aspect-square'
 
+  if (compact) {
+    return (
+      <div className="space-y-1">
+        <input ref={inputRef} type="file" accept="image/*" className="hidden"
+          onChange={(e) => { const file = e.target.files?.[0]; if (file) upload(file); e.target.value = '' }} />
+        <div className="flex items-center gap-2">
+          {value && (
+            <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-muted shrink-0">
+              <img src={value} alt="" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
+            className="flex items-center gap-1.5 rounded-lg border border-dashed border-muted-foreground/30 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors disabled:opacity-60">
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+            {value ? 'Changer' : 'Photo optionnelle'}
+          </button>
+          {value && !uploading && (
+            <button type="button" onClick={() => onChange('')}
+              className="flex items-center justify-center h-7 w-7 rounded-full hover:bg-muted transition-colors text-muted-foreground">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        {error && <p className="text-xs text-destructive">{error}</p>}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-1">
       <input
@@ -66,31 +95,21 @@ export function ImagePicker({ value, onChange, aspectRatio = 'video' }: Props) {
 
           {!uploading && (
             <div className="absolute inset-0 flex items-end justify-end p-2 gap-2">
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="flex items-center gap-1.5 rounded-full bg-black/55 backdrop-blur-sm px-3 py-1.5 text-white text-xs font-medium"
-              >
+              <button type="button" onClick={() => inputRef.current?.click()}
+                className="flex items-center gap-1.5 rounded-full bg-black/55 backdrop-blur-sm px-3 py-1.5 text-white text-xs font-medium">
                 <Camera className="h-3.5 w-3.5" />
                 Changer
               </button>
-              <button
-                type="button"
-                onClick={() => onChange('')}
-                className="flex items-center justify-center h-7 w-7 rounded-full bg-black/55 backdrop-blur-sm text-white"
-              >
+              <button type="button" onClick={() => onChange('')}
+                className="flex items-center justify-center h-7 w-7 rounded-full bg-black/55 backdrop-blur-sm text-white">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-          className={`w-full rounded-xl border-2 border-dashed border-muted-foreground/25 ${aspectClass} flex flex-col items-center justify-center gap-2 hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
-        >
+        <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
+          className={`w-full rounded-xl border-2 border-dashed border-muted-foreground/25 ${aspectClass} flex flex-col items-center justify-center gap-2 hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}>
           {uploading ? (
             <>
               <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
