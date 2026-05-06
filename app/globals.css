@@ -127,4 +127,8 @@
   html {
     @apply font-sans;
   }
+  /* Empêche le zoom automatique sur iOS lors du focus sur les inputs */
+  input, select, textarea {
+    font-size: max(16px, 1em);
+  }
 }
