@@ -52,6 +52,7 @@ export default async function EditRecipePage({ params }: Props) {
   const recipe: RecipeDetail = {
     ...raw,
     tags: (raw.recipe_tags as any[]).map((rt) => rt.tags).filter(Boolean),
+    author: null,
     ingredient_groups: (raw.ingredient_groups as any[])
       .sort((a, b) => a.position - b.position)
       .map((g) => ({
