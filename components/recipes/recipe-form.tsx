@@ -33,7 +33,7 @@ import type { Tag, Category, RecipeDetail, Difficulty, CreateRecipeInput } from 
 
 interface IngRow { id: string; name: string; amount: string; unit: string }
 interface GroupRow { id: string; name: string; ingredients: IngRow[] }
-interface StepRow { id: string; content: string; image_url: string }
+interface StepRow { id: string; content: string; image_url: string; ingredient_local_ids: string[] }
 
 const uid = () => Math.random().toString(36).slice(2)
 
@@ -43,7 +43,7 @@ const emptyGroup = (): GroupRow => ({
   ingredients: [{ id: uid(), name: '', amount: '', unit: '' }],
 })
 
-const emptyStep = (): StepRow => ({ id: uid(), content: '', image_url: '' })
+const emptyStep = (): StepRow => ({ id: uid(), content: '', image_url: '', ingredient_local_ids: [] })
 
 // ── Helpers d'initialisation ─────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ function initGroups(data?: RecipeDetail): GroupRow[] {
     name: g.name,
     ingredients: g.ingredients.length
       ? g.ingredients.map((i) => ({
-          id: uid(),
+          id: i.id, // keep DB id as local id so step links resolve directly
           name: i.name,
           amount: i.amount != null ? String(i.amount) : '',
           unit: i.unit ?? '',
@@ -69,6 +69,7 @@ function initSteps(data?: RecipeDetail): StepRow[] {
     id: uid(),
     content: s.content,
     image_url: s.image_url ?? '',
+    ingredient_local_ids: s.ingredient_ids ?? [],
   }))
 }
 
@@ -122,12 +123,17 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
       ),
     )
 
-  const removeIngredient = (gid: string, iid: string) =>
+  const removeIngredient = (gid: string, iid: string) => {
     setGroups((gs) =>
       gs.map((g) =>
         g.id === gid ? { ...g, ingredients: g.ingredients.filter((i) => i.id !== iid) } : g,
       ),
     )
+    setSteps((ss) => ss.map((s) => ({
+      ...s,
+      ingredient_local_ids: s.ingredient_local_ids.filter((id) => id !== iid),
+    })))
+  }
 
   const setIngField = (gid: string, iid: string, field: keyof IngRow, value: string) =>
     setGroups((gs) =>
@@ -140,10 +146,21 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
 
   // ── Étapes ─────────────────────────────────────────────────────────────────
 
-  const setStepField = (sid: string, field: keyof StepRow, value: string) =>
+  const [openIngPanels, setOpenIngPanels] = useState<Record<string, boolean>>({})
+
+  const setStepField = (sid: string, field: 'content' | 'image_url', value: string) =>
     setSteps((ss) => ss.map((s) => (s.id === sid ? { ...s, [field]: value } : s)))
 
   const removeStep = (sid: string) => setSteps((ss) => ss.filter((s) => s.id !== sid))
+
+  const toggleStepIngredient = (sid: string, ingId: string) =>
+    setSteps((ss) => ss.map((s) => {
+      if (s.id !== sid) return s
+      const ids = s.ingredient_local_ids.includes(ingId)
+        ? s.ingredient_local_ids.filter((id) => id !== ingId)
+        : [...s.ingredient_local_ids, ingId]
+      return { ...s, ingredient_local_ids: ids }
+    }))
 
   // ── Soumission ──────────────────────────────────────────────────────────────
 
@@ -172,9 +189,25 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
             unit: i.unit.trim(),
           })),
       })),
-      steps: steps
-        .filter((s) => s.content.trim())
-        .map((s) => ({ content: s.content.trim(), image_url: s.image_url.trim() })),
+      steps: (() => {
+        // Build localId -> {gi, ii} map based on valid (non-empty) ingredients
+        const ingPosMap: Record<string, { gi: number; ii: number }> = {}
+        groups.forEach((g, gi) => {
+          let validIi = 0
+          g.ingredients.forEach((ing) => {
+            if (ing.name.trim()) ingPosMap[ing.id] = { gi, ii: validIi++ }
+          })
+        })
+        return steps
+          .filter((s) => s.content.trim())
+          .map((s) => ({
+            content: s.content.trim(),
+            image_url: s.image_url.trim(),
+            ingredient_positions: s.ingredient_local_ids
+              .map((lid) => ingPosMap[lid])
+              .filter(Boolean) as Array<{ gi: number; ii: number }>,
+          }))
+      })(),
     }
 
     startTransition(async () => {
@@ -375,26 +408,67 @@ export function RecipeForm({ tags, categories, defaultCategoryId, initialData }:
       {/* Étapes */}
       <section className="space-y-3">
         <h2 className="font-semibold text-base">Étapes</h2>
-        {steps.map((step, si) => (
-          <div key={step.id} className="rounded-lg border p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Étape {si + 1}</span>
-              {steps.length > 1 && (
-                <Button type="button" variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive"
-                  onClick={() => removeStep(step.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+        {steps.map((step, si) => {
+          const allIngRows = groups.flatMap((g) => g.ingredients.filter((i) => i.name.trim()))
+          const isOpen = !!openIngPanels[step.id]
+          return (
+            <div key={step.id} className="rounded-lg border p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Étape {si + 1}</span>
+                {steps.length > 1 && (
+                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive"
+                    onClick={() => removeStep(step.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+              <Textarea value={step.content} onChange={(e) => setStepField(step.id, 'content', e.target.value)}
+                placeholder="Décrivez cette étape..." rows={3} />
+              <ImagePicker
+                value={step.image_url}
+                onChange={(url) => setStepField(step.id, 'image_url', url)}
+                compact
+              />
+
+              {/* Sélecteur d'ingrédients */}
+              {allIngRows.length > 0 && (
+                <div className="pt-1 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpenIngPanels((p) => ({ ...p, [step.id]: !p[step.id] }))}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Plus className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-45' : ''}`} />
+                    {step.ingredient_local_ids.length > 0
+                      ? `Ingrédients (${step.ingredient_local_ids.length})`
+                      : 'Associer des ingrédients'}
+                  </button>
+                  {isOpen && (
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {allIngRows.map((ing) => {
+                        const selected = step.ingredient_local_ids.includes(ing.id)
+                        return (
+                          <button
+                            key={ing.id}
+                            type="button"
+                            onClick={() => toggleStepIngredient(step.id, ing.id)}
+                            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                              selected
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'border-border hover:bg-muted'
+                            }`}
+                          >
+                            {ing.name}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-            <Textarea value={step.content} onChange={(e) => setStepField(step.id, 'content', e.target.value)}
-              placeholder="Décrivez cette étape..." rows={3} />
-            <ImagePicker
-              value={step.image_url}
-              onChange={(url) => setStepField(step.id, 'image_url', url)}
-              compact
-            />
-          </div>
-        ))}
+          )
+        })}
         <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setSteps((ss) => [...ss, emptyStep()])}>
           <Plus className="h-4 w-4 mr-1" /> Ajouter une étape
         </Button>

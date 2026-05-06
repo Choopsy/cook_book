@@ -16,19 +16,6 @@ interface Props {
   steps: Step[]
 }
 
-function normalize(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, '')
-}
-
-function matchIngredients(stepContent: string, allIngredients: Ingredient[]): Ingredient[] {
-  const normalizedStep = normalize(stepContent)
-  return allIngredients.filter((ing) => {
-    const normalizedName = normalize(ing.name)
-    const words = normalizedName.split(/\s+/).filter((w) => w.length > 2)
-    if (words.length === 0) return normalizedStep.includes(normalizedName)
-    return words.some((word) => normalizedStep.includes(word))
-  })
-}
 
 function fmtAmount(value: number): string {
   const n = Math.round(value * 10) / 10
@@ -249,7 +236,7 @@ function StepScreen({
   const progress = ((stepIndex + 1) / totalSteps) * 100
   const isLast = stepIndex === totalSteps - 1
   const touchStartX = useRef(0)
-  const matched = matchIngredients(step.content, allIngredients)
+  const matched = allIngredients.filter((ing) => step.ingredient_ids.includes(ing.id))
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX

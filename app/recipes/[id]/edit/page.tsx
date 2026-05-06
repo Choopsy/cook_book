@@ -32,7 +32,7 @@ export default async function EditRecipePage({ params }: Props) {
           id, name, position,
           ingredients ( id, name, amount, unit, position )
         ),
-        steps ( id, position, content, image_url )
+        steps ( id, position, content, image_url, step_ingredients ( ingredient_id ) )
       `)
       .eq('id', id)
       .single(),
@@ -59,7 +59,12 @@ export default async function EditRecipePage({ params }: Props) {
         ...g,
         ingredients: (g.ingredients as any[]).sort((a: any, b: any) => a.position - b.position),
       })),
-    steps: (raw.steps as any[]).sort((a, b) => a.position - b.position),
+    steps: (raw.steps as any[])
+      .sort((a: any, b: any) => a.position - b.position)
+      .map((s: any) => ({
+        ...s,
+        ingredient_ids: (s.step_ingredients as any[] ?? []).map((si: any) => si.ingredient_id),
+      })),
   }
 
   return (

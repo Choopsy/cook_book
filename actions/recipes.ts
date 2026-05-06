@@ -114,6 +114,9 @@ async function insertRelations(
       .insert(input.tag_ids.map((tag_id) => ({ recipe_id: recipeId, tag_id })))
   }
 
+  // Map "gi_ii" -> DB ingredient ID (for step_ingredients links)
+  const ingDbIds: Record<string, string> = {}
+
   for (let gi = 0; gi < input.groups.length; gi++) {
     const group = input.groups[gi]
     const validIngredients = group.ingredients.filter((i) => i.name.trim())
@@ -128,7 +131,7 @@ async function insertRelations(
     if (!groupRow) continue
 
     if (validIngredients.length > 0) {
-      await supabase.from('ingredients').insert(
+      const { data: ingRows } = await supabase.from('ingredients').insert(
         validIngredients.map((ing, ii) => ({
           group_id: groupRow.id,
           name: ing.name,
@@ -136,19 +139,37 @@ async function insertRelations(
           unit: ing.unit || null,
           position: ii,
         })),
-      )
+      ).select('id')
+
+      ingRows?.forEach((row, ii) => {
+        ingDbIds[`${gi}_${ii}`] = row.id
+      })
     }
   }
 
   const validSteps = input.steps.filter((s) => s.content.trim())
   if (validSteps.length > 0) {
-    await supabase.from('steps').insert(
+    const { data: stepRows } = await supabase.from('steps').insert(
       validSteps.map((step, si) => ({
         recipe_id: recipeId,
         position: si + 1,
         content: step.content,
         image_url: step.image_url || null,
       })),
-    )
+    ).select('id')
+
+    const stepIngLinks: { step_id: string; ingredient_id: string }[] = []
+    validSteps.forEach((step, si) => {
+      const stepId = stepRows?.[si]?.id
+      if (!stepId) return
+      step.ingredient_positions.forEach(({ gi, ii }) => {
+        const ingId = ingDbIds[`${gi}_${ii}`]
+        if (ingId) stepIngLinks.push({ step_id: stepId, ingredient_id: ingId })
+      })
+    })
+
+    if (stepIngLinks.length > 0) {
+      await supabase.from('step_ingredients').insert(stepIngLinks)
+    }
   }
 }

@@ -41,6 +41,7 @@ export interface Step {
   position: number
   content: string
   image_url: string | null
+  ingredient_ids: string[]
 }
 
 export interface RecipeAuthor {
@@ -83,5 +84,5 @@ export interface CreateRecipeInput {
     name: string
     ingredients: { name: string; amount: number | null; unit: string }[]
   }[]
-  steps: { content: string; image_url: string }[]
+  steps: { content: string; image_url: string; ingredient_positions: Array<{ gi: number; ii: number }> }[]
 }
