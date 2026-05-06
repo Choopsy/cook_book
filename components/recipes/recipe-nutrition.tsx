@@ -12,7 +12,9 @@ function fmt(v: number) {
   return v.toLocaleString('fr-FR', { maximumFractionDigits: 1 })
 }
 
-const ROWS = [
+type Row = { label: string; key: keyof NutritionSummary; unit: string; bold?: boolean; sub?: boolean }
+
+const ROWS: Row[] = [
   { label: 'Énergie',             key: 'energy_kcal',     unit: 'kcal', bold: true },
   { label: 'Protéines',           key: 'proteins_g',      unit: 'g' },
   { label: 'Glucides',            key: 'carbs_g',         unit: 'g' },
@@ -21,7 +23,7 @@ const ROWS = [
   { label: 'dont saturés',        key: 'saturated_fat_g', unit: 'g', sub: true },
   { label: 'Fibres',              key: 'fiber_g',         unit: 'g' },
   { label: 'Sel',                 key: 'salt_g',          unit: 'g' },
-] as const
+]
 
 export function RecipeNutrition({ nutrition }: Props) {
   const [open, setOpen] = useState(false)
