@@ -48,13 +48,20 @@ function extractTag(xml, tag) {
 }
 
 function parseAlim(xml) {
-  const map = new Map() // alim_code → { name_fr, name_en }
+  const map = new Map() // alim_code → { name_fr, name_en, search_name }
   const blocks = xml.split('<ALIM>')
   for (const block of blocks.slice(1)) {
     const code    = block.match(/<alim_code>\s*(\d+)\s*<\/alim_code>/)?.[1]?.trim()
-    const nameFr  = block.match(/<alim_nom_fr>\s*([^<]+)\s*<\/alim_nom_fr>/)?.[1]?.trim()
-    const nameEn  = block.match(/<alim_nom_eng>\s*([^<]+)\s*<\/alim_nom_eng>/)?.[1]?.trim()
-    if (code && nameFr) map.set(code, { name_fr: nameFr, name_en: nameEn ?? null })
+    const rawFr   = block.match(/<alim_nom_fr>\s*([^<]+)\s*<\/alim_nom_fr>/)?.[1]?.trim()
+    const rawEn   = block.match(/<alim_nom_eng>\s*([^<]+)\s*<\/alim_nom_eng>/)?.[1]?.trim()
+    if (code && rawFr) {
+      const name_fr = decodeEntities(rawFr)
+      map.set(code, {
+        name_fr,
+        name_en: rawEn ? decodeEntities(rawEn) : null,
+        search_name: normalizeSearch(rawFr),
+      })
+    }
   }
   return map
 }
@@ -73,6 +80,21 @@ function parseCompo(xml, wantedCodes) {
     data.get(alim)[cst] = isNaN(parsed) ? null : parsed
   }
   return data
+}
+
+// ── Nettoyage des noms ───────────────────────────────────────────────────────
+const XML_ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&apos;': "'", '&quot;': '"' }
+function decodeEntities(s) {
+  return s.replace(/&(?:amp|lt|gt|apos|quot);/g, (m) => XML_ENTITIES[m])
+}
+
+function normalizeSearch(s) {
+  return decodeEntities(s)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // retire les diacritiques
+    .replace(/[œŒ]/g, 'oe')          // ligatures françaises
+    .replace(/[æÆ]/g, 'ae')
+    .toLowerCase()
 }
 
 // ── SQL helpers ─────────────────────────────────────────────────────────────
@@ -114,8 +136,12 @@ create table if not exists public.canonical_ingredients (
   ciqual_code   text unique not null,
   name_fr       text not null,
   name_en       text,
+  search_name   text not null,
   ${nutrientCols.map(c => `${c.padEnd(20)} numeric`).join(',\n  ')}
 );
+
+create index if not exists canonical_ingredients_search_idx
+  on public.canonical_ingredients (search_name text_pattern_ops);
 
 -- Index pour la recherche par nom
 create index if not exists canonical_ingredients_name_fr_idx
@@ -130,7 +156,7 @@ create policy "Lecture authenticated"
 
 -- ── Données ──────────────────────────────────────────────────────────────────
 insert into public.canonical_ingredients
-  (ciqual_code, name_fr, name_en, ${nutrientCols.join(', ')})
+  (ciqual_code, name_fr, name_en, search_name, ${nutrientCols.join(', ')})
 values
 `
 
@@ -141,6 +167,7 @@ values
       esc(code),
       esc(food.name_fr),
       esc(food.name_en),
+      esc(food.search_name),
       ...Object.keys(NUTRIENTS).map(k => esc(nutr[k] ?? null)),
     ]
     rows.push(`  (${vals.join(', ')})`)

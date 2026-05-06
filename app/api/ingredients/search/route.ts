@@ -1,10 +1,21 @@
 import { type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get('q')?.trim() ?? ''
-  if (q.length < 2) return Response.json([])
+function normalizeSearch(s: string) {
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[œŒ]/g, 'oe')
+    .replace(/[æÆ]/g, 'ae')
+    .toLowerCase()
+    .trim()
+}
 
+export async function GET(request: NextRequest) {
+  const raw = request.nextUrl.searchParams.get('q')?.trim() ?? ''
+  if (raw.length < 2) return Response.json([])
+
+  const q = normalizeSearch(raw)
   const supabase = await createClient()
 
   // Priorité : commence par la requête, puis contient la requête
@@ -12,15 +23,15 @@ export async function GET(request: NextRequest) {
     supabase
       .from('canonical_ingredients')
       .select('name_fr')
-      .ilike('name_fr', `${q}%`)
-      .order('name_fr')
+      .ilike('search_name', `${q}%`)
+      .order('search_name')
       .limit(5),
     supabase
       .from('canonical_ingredients')
       .select('name_fr')
-      .ilike('name_fr', `%${q}%`)
-      .not('name_fr', 'ilike', `${q}%`)
-      .order('name_fr')
+      .ilike('search_name', `%${q}%`)
+      .not('search_name', 'ilike', `${q}%`)
+      .order('search_name')
       .limit(4),
   ])
 
