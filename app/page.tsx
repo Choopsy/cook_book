@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Plus, ChefHat, Heart } from 'lucide-react'
+import { ChefHat, Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
@@ -90,12 +90,6 @@ export default async function HomePage() {
         />
       </main>
 
-      {/* FAB — nouvelle catégorie */}
-      <Link href="/categories/new" className="fixed bottom-20 md:bottom-6 right-4">
-        <Button className="h-14 w-14 rounded-full shadow-lg" size="icon" aria-label="Nouvelle catégorie">
-          <Plus className="h-6 w-6" />
-        </Button>
-      </Link>
     </div>
   )
 }

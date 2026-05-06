@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Heart, PlusCircle, Settings, ChefHat } from 'lucide-react'
+import { Home, Heart, PlusCircle, Settings, ChefHat, BookOpen, FolderPlus } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
+import { NewItemSheet } from './new-item-sheet'
 
 interface Props {
   isAdmin: boolean
@@ -13,7 +14,6 @@ interface Props {
 const BASE_ITEMS = [
   { href: '/', icon: Home, label: 'Accueil' },
   { href: '/favorites', icon: Heart, label: 'Favoris' },
-  { href: '/recipes/new', icon: PlusCircle, label: 'Nouveau' },
 ]
 
 export function NavContent({ isAdmin }: Props) {
@@ -39,16 +39,24 @@ export function NavContent({ isAdmin }: Props) {
         <div className="flex items-center gap-1 flex-1">
           {items.map(({ href, icon: Icon, label }) => (
             <Link key={href} href={href}>
-              <Button
-                variant={isActive(href) ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-1.5"
-              >
+              <Button variant={isActive(href) ? 'secondary' : 'ghost'} size="sm" className="gap-1.5">
                 <Icon className="h-4 w-4" />
                 {label}
               </Button>
             </Link>
           ))}
+          <Link href="/recipes/new">
+            <Button variant={isActive('/recipes/new') ? 'secondary' : 'ghost'} size="sm" className="gap-1.5">
+              <BookOpen className="h-4 w-4" />
+              Nouvelle recette
+            </Button>
+          </Link>
+          <Link href="/categories/new">
+            <Button variant={isActive('/categories/new') ? 'secondary' : 'ghost'} size="sm" className="gap-1.5">
+              <FolderPlus className="h-4 w-4" />
+              Nouvelle catégorie
+            </Button>
+          </Link>
         </div>
 
         <form action={signOut}>
@@ -62,29 +70,34 @@ export function NavContent({ isAdmin }: Props) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-background/90 backdrop-blur-sm border-t flex items-center justify-around safe-area-inset-bottom">
         {items.map(({ href, icon: Icon, label }) => {
           const active = isActive(href)
-          const isNew = href === '/recipes/new'
           return (
             <Link
               key={href}
               href={href}
               className="flex flex-col items-center gap-0.5 flex-1 py-2"
             >
-              {isNew ? (
-                <span className={`flex items-center justify-center h-9 w-9 rounded-full transition-colors ${active ? 'bg-primary' : 'bg-primary/90'}`}>
-                  <Icon className="h-5 w-5 text-primary-foreground" strokeWidth={2} />
-                </span>
-              ) : (
-                <Icon
-                  className={`h-5 w-5 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
-                  strokeWidth={active ? 2.5 : 1.5}
-                />
-              )}
+              <Icon
+                className={`h-5 w-5 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
+                strokeWidth={active ? 2.5 : 1.5}
+              />
               <span className={`text-[10px] font-medium transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
                 {label}
               </span>
             </Link>
           )
         })}
+        <NewItemSheet />
+        {isAdmin && (
+          <Link href="/admin" className="flex flex-col items-center gap-0.5 flex-1 py-2">
+            <Settings
+              className={`h-5 w-5 transition-colors ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}
+              strokeWidth={isActive('/admin') ? 2.5 : 1.5}
+            />
+            <span className={`text-[10px] font-medium transition-colors ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}>
+              Admin
+            </span>
+          </Link>
+        )}
       </nav>
     </>
   )
