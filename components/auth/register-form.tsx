@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Check, X } from 'lucide-react'
-import { signUp } from '@/actions/auth'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SubmitButton } from './submit-button'
@@ -39,7 +38,7 @@ export function RegisterForm() {
   const canSubmit = allRulesValid && confirmMatches
 
   return (
-    <form action={signUp} className="space-y-4">
+    <form className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="full_name">Prénom et nom</Label>
         <Input
