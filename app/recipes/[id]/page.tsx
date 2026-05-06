@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator'
 import { DifficultyBadge } from '@/components/recipes/difficulty-badge'
 import { ServingAdjuster } from '@/components/recipes/serving-adjuster'
 import { RecipeActions } from '@/components/recipes/recipe-actions'
+import { RecipeNutrition } from '@/components/recipes/recipe-nutrition'
+import { calcRecipeNutrition } from '@/lib/nutrition'
 import type { RecipeDetail, Category } from '@/lib/types'
 
 interface Props {
@@ -70,6 +72,9 @@ export default async function RecipeDetailPage({ params }: Props) {
   const isOwner = user?.id === recipe.author_id
   const initialLiked = !!likeRow
   const userCategories = (userCats as Category[]) ?? []
+
+  const allIngredients = recipe.ingredient_groups.flatMap((g) => g.ingredients)
+  const nutrition = await calcRecipeNutrition(supabase, allIngredients, recipe.base_servings ?? 1)
 
   return (
     <div className="min-h-svh pb-8">
@@ -171,6 +176,7 @@ export default async function RecipeDetailPage({ params }: Props) {
               baseServings={recipe.base_servings ?? 4}
               groups={recipe.ingredient_groups}
             />
+            {nutrition && <RecipeNutrition nutrition={nutrition} />}
           </>
         )}
 
