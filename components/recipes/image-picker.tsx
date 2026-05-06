@@ -46,24 +46,34 @@ export function ImagePicker({ value, onChange, aspectRatio = 'video', compact = 
       <div className="space-y-1">
         <input ref={inputRef} type="file" accept="image/*" className="hidden"
           onChange={(e) => { const file = e.target.files?.[0]; if (file) upload(file); e.target.value = '' }} />
-        <div className="flex items-center gap-2">
-          {value && (
-            <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-muted shrink-0">
-              <img src={value} alt="" className="w-full h-full object-cover" />
-            </div>
-          )}
+        {value ? (
+          <div className="relative w-full h-24 rounded-xl overflow-hidden bg-muted">
+            <img src={value} alt="" className="w-full h-full object-cover" />
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                <Loader2 className="h-5 w-5 text-white animate-spin" />
+              </div>
+            )}
+            {!uploading && (
+              <div className="absolute inset-0 flex items-center justify-end pr-2 gap-2">
+                <button type="button" onClick={() => inputRef.current?.click()}
+                  className="flex items-center gap-1.5 rounded-full bg-black/55 backdrop-blur-sm px-3 py-1.5 text-white text-xs font-medium">
+                  <Camera className="h-3.5 w-3.5" /> Changer
+                </button>
+                <button type="button" onClick={() => onChange('')}
+                  className="flex items-center justify-center h-7 w-7 rounded-full bg-black/55 backdrop-blur-sm text-white">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
           <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
-            className="flex items-center gap-1.5 rounded-lg border border-dashed border-muted-foreground/30 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors disabled:opacity-60">
-            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-            {value ? 'Changer' : 'Photo optionnelle'}
+            className="w-full h-24 rounded-xl border-2 border-dashed border-muted-foreground/25 flex items-center justify-center gap-2 hover:bg-muted/50 transition-colors disabled:opacity-60">
+            {uploading ? <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" /> : <Camera className="h-5 w-5 text-muted-foreground" />}
+            <span className="text-sm text-muted-foreground">{uploading ? 'Téléchargement…' : 'Ajouter une photo'}</span>
           </button>
-          {value && !uploading && (
-            <button type="button" onClick={() => onChange('')}
-              className="flex items-center justify-center h-7 w-7 rounded-full hover:bg-muted transition-colors text-muted-foreground">
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
+        )}
         {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
     )
