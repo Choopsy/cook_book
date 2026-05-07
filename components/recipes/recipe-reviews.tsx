@@ -121,9 +121,9 @@ export function RecipeReviews({ recipeId, myReview, otherReviews }: Props) {
 
       <ReviewForm key={myReview?.id ?? 'new'} recipeId={recipeId} myReview={myReview} />
 
-      {otherReviews.length > 0 && (
+      {(myReview || otherReviews.length > 0) && (
         <div className="space-y-4 pt-1">
-          {otherReviews.map((review) => (
+          {[...(myReview ? [myReview] : []), ...otherReviews].map((review) => (
             <div key={review.id} className="space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
                 {review.author?.avatar_url ? (
@@ -134,10 +134,10 @@ export function RecipeReviews({ recipeId, myReview, otherReviews }: Props) {
                   </div>
                 )}
                 <span className="text-sm font-medium">{review.author?.full_name ?? 'Anonyme'}</span>
-                {review.rating && <Stars value={review.rating} size="sm" />}
+                {review.rating != null && <Stars value={review.rating} size="sm" />}
                 <span className="text-xs text-muted-foreground ml-auto">{formatDate(review.created_at)}</span>
               </div>
-              {review.comment && (
+              {review.comment?.trim() && (
                 <p className="text-sm text-muted-foreground pl-8 leading-relaxed">{review.comment}</p>
               )}
             </div>
