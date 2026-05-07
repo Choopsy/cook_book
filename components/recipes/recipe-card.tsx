@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Clock, ChefHat, User } from 'lucide-react'
+import { Clock, ChefHat, User, Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { DifficultyBadge } from './difficulty-badge'
 import type { RecipeSummary } from '@/lib/types'
@@ -54,6 +54,15 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
               )}
             </div>
           )}
+
+          <div className="h-4 flex items-center gap-1">
+            {recipe.avg_rating != null && (
+              <>
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                <span className="text-xs text-muted-foreground">{recipe.avg_rating.toFixed(1)}</span>
+              </>
+            )}
+          </div>
 
           {recipe.author && (
             <div className="flex items-center gap-1.5 pt-1 border-t">

@@ -16,7 +16,8 @@ export default async function FavoritesPage() {
       recipes (
         id, title, description, cover_image_url,
         prep_time_min, cook_time_min, base_servings, difficulty, category_id, created_at,
-        recipe_tags ( tags ( id, name, color ) )
+        recipe_tags ( tags ( id, name, color ) ),
+        recipe_reviews ( rating )
       )
     `)
     .eq('user_id', user?.id ?? '')
@@ -24,10 +25,14 @@ export default async function FavoritesPage() {
 
   const recipes: RecipeSummary[] =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (raw ?? []).map((row: any) => ({
-      ...row.recipes,
-      tags: (row.recipes?.recipe_tags ?? []).map((rt: any) => rt.tags).filter(Boolean),
-    })).filter((r: any) => r.id)
+    (raw ?? []).map((row: any) => {
+      const ratings = (row.recipes?.recipe_reviews ?? []).map((r: any) => r.rating).filter((r: any) => r !== null)
+      return {
+        ...row.recipes,
+        tags: (row.recipes?.recipe_tags ?? []).map((rt: any) => rt.tags).filter(Boolean),
+        avg_rating: ratings.length ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : null,
+      }
+    }).filter((r: any) => r.id)
 
   return (
     <div className="min-h-svh pb-8">

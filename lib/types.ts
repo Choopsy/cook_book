@@ -62,6 +62,7 @@ export interface RecipeSummary {
   created_at: string
   tags: Tag[]
   author: RecipeAuthor | null
+  avg_rating: number | null
 }
 
 export interface RecipeDetail extends RecipeSummary {

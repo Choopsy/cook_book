@@ -69,6 +69,7 @@ export default async function RecipeDetailPage({ params }: Props) {
     ...raw,
     tags: (raw.recipe_tags as any[]).map((rt) => rt.tags).filter(Boolean),
     author,
+    avg_rating: null,
     ingredient_groups: (raw.ingredient_groups as any[])
       .sort((a, b) => a.position - b.position)
       .map((g) => ({

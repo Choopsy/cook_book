@@ -48,7 +48,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       id, title, description, cover_image_url,
       prep_time_min, cook_time_min, base_servings, difficulty, category_id, created_at,
       recipe_tags ( tags ( id, name, color ) ),
-      profiles!author_id ( full_name, avatar_url )
+      profiles!author_id ( full_name, avatar_url ),
+      recipe_reviews ( rating )
     `)
     .order('created_at', { ascending: false })
 
@@ -73,11 +74,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const recipes: RecipeSummary[] =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    raw?.map((r: any) => ({
-      ...r,
-      tags: (r.recipe_tags as any[]).map((rt) => rt.tags).filter(Boolean),
-      author: r.profiles ?? null,
-    })) ?? []
+    raw?.map((r: any) => {
+      const ratings = (r.recipe_reviews ?? []).map((rv: any) => rv.rating).filter((rv: any) => rv !== null)
+      return {
+        ...r,
+        tags: (r.recipe_tags as any[]).map((rt) => rt.tags).filter(Boolean),
+        author: r.profiles ?? null,
+        avg_rating: ratings.length ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : null,
+      }
+    }) ?? []
 
   const hasFilters = q || difficulty || tag
 
