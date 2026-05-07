@@ -70,6 +70,16 @@ export interface RecipeDetail extends RecipeSummary {
   steps: Step[]
 }
 
+export interface Review {
+  id: string
+  recipe_id: string
+  user_id: string
+  rating: number | null
+  comment: string | null
+  created_at: string
+  author: RecipeAuthor | null
+}
+
 export interface CreateRecipeInput {
   title: string
   description: string

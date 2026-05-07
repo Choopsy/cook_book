@@ -9,8 +9,9 @@ import { DifficultyBadge } from '@/components/recipes/difficulty-badge'
 import { ServingAdjuster } from '@/components/recipes/serving-adjuster'
 import { RecipeActions } from '@/components/recipes/recipe-actions'
 import { RecipeNutrition } from '@/components/recipes/recipe-nutrition'
+import { RecipeReviews } from '@/components/recipes/recipe-reviews'
 import { calcRecipeNutrition } from '@/lib/nutrition'
-import type { RecipeDetail, Category } from '@/lib/types'
+import type { RecipeDetail, Category, Review } from '@/lib/types'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -21,7 +22,7 @@ export default async function RecipeDetailPage({ params }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: raw }, { data: likeRow }, { data: userCats }] = await Promise.all([
+  const [{ data: raw }, { data: likeRow }, { data: userCats }, { data: reviewsData }] = await Promise.all([
     supabase
       .from('recipes')
       .select(`
@@ -52,6 +53,11 @@ export default async function RecipeDetailPage({ params }: Props) {
           .eq('author_id', user.id)
           .order('name')
       : Promise.resolve({ data: [] }),
+    // Avis sur la recette
+    supabase.from('recipe_reviews')
+      .select('id, recipe_id, user_id, rating, comment, created_at, profiles!user_id(full_name, avatar_url)')
+      .eq('recipe_id', id)
+      .order('created_at', { ascending: false }),
   ])
 
   if (!raw) notFound()
@@ -71,6 +77,13 @@ export default async function RecipeDetailPage({ params }: Props) {
       })),
     steps: (raw.steps as any[]).sort((a, b) => a.position - b.position),
   }
+
+  const reviews: Review[] = (reviewsData ?? []).map((r) => ({
+    ...(r as any),
+    author: (r as any).profiles ?? null,
+  }))
+  const myReview = reviews.find((r) => r.user_id === user?.id) ?? null
+  const otherReviews = reviews.filter((r) => r.user_id !== user?.id)
 
   const totalTime = (recipe.prep_time_min ?? 0) + (recipe.cook_time_min ?? 0)
   const isOwner = user?.id === recipe.author_id
@@ -233,6 +246,9 @@ export default async function RecipeDetailPage({ params }: Props) {
             </Link>
           </>
         )}
+
+        <Separator />
+        <RecipeReviews recipeId={id} myReview={myReview} otherReviews={otherReviews} />
       </div>
     </div>
   )
