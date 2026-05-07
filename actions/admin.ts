@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
@@ -35,4 +36,28 @@ export async function toggleContribute(userId: string, current: boolean) {
   const supabase = await createClient()
   await supabase.from('profiles').update({ can_contribute: !current }).eq('id', userId)
   redirect('/admin')
+}
+
+export async function deleteRecipeAdmin(userId: string, recipeId: string) {
+  await assertAdmin()
+  const admin = createAdminClient()
+  await admin.from('recipes').delete().eq('id', recipeId)
+  revalidatePath(`/admin/users/${userId}`)
+  redirect(`/admin/users/${userId}`)
+}
+
+export async function deleteCategoryAdmin(userId: string, categoryId: string) {
+  await assertAdmin()
+  const admin = createAdminClient()
+  await admin.from('categories').delete().eq('id', categoryId)
+  revalidatePath(`/admin/users/${userId}`)
+  redirect(`/admin/users/${userId}`)
+}
+
+export async function deleteReviewAdmin(userId: string, reviewId: string) {
+  await assertAdmin()
+  const admin = createAdminClient()
+  await admin.from('recipe_reviews').delete().eq('id', reviewId)
+  revalidatePath(`/admin/users/${userId}`)
+  redirect(`/admin/users/${userId}`)
 }
