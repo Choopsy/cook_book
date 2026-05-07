@@ -6,11 +6,14 @@ export async function AppNav() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, avatar_url')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, { count: pendingCount }] = await Promise.all([
+    supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single(),
+    supabase
+      .from('friendships')
+      .select('*', { count: 'exact', head: true })
+      .eq('addressee_id', user.id)
+      .eq('status', 'pending'),
+  ])
 
   const isAdmin = user.email === process.env.ADMIN_EMAIL
   return (
@@ -18,6 +21,7 @@ export async function AppNav() {
       isAdmin={isAdmin}
       avatarUrl={profile?.avatar_url ?? null}
       fullName={profile?.full_name ?? null}
+      pendingFriendsCount={pendingCount ?? 0}
     />
   )
 }

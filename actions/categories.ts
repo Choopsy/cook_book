@@ -36,6 +36,17 @@ export async function createCategory(formData: FormData) {
     .single()
 
   if (error || !data) return { error: error?.message ?? 'Erreur lors de la création.' }
+
+  if (visibility === 'shared') {
+    const memberIdsJson = formData.get('member_ids') as string | null
+    const memberIds: string[] = memberIdsJson ? JSON.parse(memberIdsJson) : []
+    if (memberIds.length > 0) {
+      await supabase.from('category_members').insert(
+        memberIds.map((user_id) => ({ category_id: data.id, user_id })),
+      )
+    }
+  }
+
   redirect(`/categories/${data.id}`)
 }
 
@@ -55,6 +66,32 @@ export async function updateCategory(id: string, formData: FormData) {
     .eq('id', id)
 
   if (error) return { error: error.message }
+
+  if (visibility === 'shared') {
+    const memberIdsJson = formData.get('member_ids') as string | null
+    const newIds = new Set<string>(memberIdsJson ? JSON.parse(memberIdsJson) : [])
+
+    const { data: current } = await supabase
+      .from('category_members')
+      .select('user_id')
+      .eq('category_id', id)
+
+    const currentIds = new Set((current ?? []).map((r) => r.user_id))
+    const toAdd = [...newIds].filter((uid) => !currentIds.has(uid))
+    const toRemove = [...currentIds].filter((uid) => !newIds.has(uid))
+
+    await Promise.all([
+      toAdd.length > 0
+        ? supabase.from('category_members').insert(toAdd.map((user_id) => ({ category_id: id, user_id })))
+        : null,
+      ...toRemove.map((uid) =>
+        supabase.from('category_members').delete().eq('category_id', id).eq('user_id', uid),
+      ),
+    ].filter(Boolean))
+  } else {
+    await supabase.from('category_members').delete().eq('category_id', id)
+  }
+
   redirect(`/categories/${id}`)
 }
 

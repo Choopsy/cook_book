@@ -11,6 +11,7 @@ interface Props {
   isAdmin: boolean
   avatarUrl: string | null
   fullName: string | null
+  pendingFriendsCount: number
 }
 
 const BASE_ITEMS = [
@@ -19,7 +20,7 @@ const BASE_ITEMS = [
   { href: '/friends', icon: Users, label: 'Amis' },
 ]
 
-export function NavContent({ isAdmin, avatarUrl, fullName }: Props) {
+export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }: Props) {
   const pathname = usePathname()
 
   const items = [...BASE_ITEMS]
@@ -40,8 +41,18 @@ export function NavContent({ isAdmin, avatarUrl, fullName }: Props) {
           {items.map(({ href, icon: Icon, label }) => (
             <Link key={href} href={href}>
               <Button variant={isActive(href) ? 'secondary' : 'ghost'} size="sm" className="gap-1.5">
-                <Icon className="h-4 w-4" />
+                <span className="relative">
+                  <Icon className="h-4 w-4" />
+                  {href === '/friends' && pendingFriendsCount > 0 && (
+                    <span className="absolute -top-1 -right-1.5 h-2 w-2 rounded-full bg-red-500" />
+                  )}
+                </span>
                 {label}
+                {href === '/friends' && pendingFriendsCount > 0 && (
+                  <span className="ml-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+                    {pendingFriendsCount > 9 ? '9+' : pendingFriendsCount}
+                  </span>
+                )}
               </Button>
             </Link>
           ))}
@@ -95,10 +106,17 @@ export function NavContent({ isAdmin, avatarUrl, fullName }: Props) {
               href={href}
               className="flex flex-col items-center gap-0.5 flex-1 py-2"
             >
-              <Icon
-                className={`h-5 w-5 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
-                strokeWidth={active ? 2.5 : 1.5}
-              />
+              <span className="relative">
+                <Icon
+                  className={`h-5 w-5 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
+                  strokeWidth={active ? 2.5 : 1.5}
+                />
+                {href === '/friends' && pendingFriendsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {pendingFriendsCount > 9 ? '9+' : pendingFriendsCount}
+                  </span>
+                )}
+              </span>
               <span className={`text-[10px] font-medium transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
                 {label}
               </span>
