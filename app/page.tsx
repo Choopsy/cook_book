@@ -11,7 +11,7 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Trois requêtes séparées pour éviter la dépendance circulaire RLS (categories ↔ recipes)
-  const [{ data: rawCats, error: catsError }, { data: rawRecipes }, { data: rawSaves }] = await Promise.all([
+  const [{ data: rawCats }, { data: rawRecipes }, { data: rawSaves }] = await Promise.all([
     supabase
       .from('categories')
       .select('id, author_id, name, visibility, cover_image_url, created_at')
@@ -23,8 +23,6 @@ export default async function HomePage() {
       .from('category_saves')
       .select('category_id, recipe_id'),
   ])
-
-  console.log('[DEBUG page] user:', user?.id ?? 'null', '| rawCats count:', rawCats?.length ?? 'null/error', '| catsError:', catsError?.message ?? 'none')
 
   const categories = (rawCats ?? []) as Category[]
 

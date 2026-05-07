@@ -36,9 +36,12 @@ ALTER TABLE category_members ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "category_members_read" ON category_members FOR SELECT TO authenticated
   USING (true);
-CREATE POLICY "category_members_write" ON category_members FOR ALL TO authenticated
-  USING     (EXISTS (SELECT 1 FROM categories WHERE id = category_id AND author_id = auth.uid()))
+-- FOR INSERT / DELETE séparés (pas FOR ALL) pour éviter la récursion infinie :
+-- categories_select → category_members → categories → ...
+CREATE POLICY "category_members_insert" ON category_members FOR INSERT TO authenticated
   WITH CHECK (EXISTS (SELECT 1 FROM categories WHERE id = category_id AND author_id = auth.uid()));
+CREATE POLICY "category_members_delete" ON category_members FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM categories WHERE id = category_id AND author_id = auth.uid()));
 
 -- ── Visibility on categories ──────────────────────────────────────────────────
 
