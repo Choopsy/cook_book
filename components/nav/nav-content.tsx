@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Heart, PlusCircle, Settings, ChefHat, BookOpen, FolderPlus, User } from 'lucide-react'
+import { Home, Heart, PlusCircle, Settings, ChefHat, BookOpen, FolderPlus, User, Users } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { NewItemSheet } from './new-item-sheet'
@@ -16,6 +16,7 @@ interface Props {
 const BASE_ITEMS = [
   { href: '/', icon: Home, label: 'Accueil' },
   { href: '/favorites', icon: Heart, label: 'Favoris' },
+  { href: '/friends', icon: Users, label: 'Amis' },
 ]
 
 export function NavContent({ isAdmin, avatarUrl, fullName }: Props) {

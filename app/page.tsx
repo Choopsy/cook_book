@@ -14,7 +14,7 @@ export default async function HomePage() {
   const [{ data: rawCats }, { data: rawRecipes }, { data: rawSaves }] = await Promise.all([
     supabase
       .from('categories')
-      .select('id, author_id, name, is_public, cover_image_url, created_at')
+      .select('id, author_id, name, visibility, cover_image_url, created_at')
       .order('name'),
     supabase
       .from('recipes')
@@ -26,8 +26,7 @@ export default async function HomePage() {
 
   const categories = (rawCats ?? []) as Category[]
 
-  // Recettes natives par catégorie (recipe.category_id)
-  const nativeIds = new Map<string, Set<string>>()   // category_id → Set<recipe_id>
+  const nativeIds   = new Map<string, Set<string>>()
   const previewByCat = new Map<string, string>()
 
   for (const r of rawRecipes ?? []) {
@@ -39,15 +38,13 @@ export default async function HomePage() {
     }
   }
 
-  // Recettes sauvegardées par catégorie (category_saves)
-  const savedIds = new Map<string, Set<string>>()    // category_id → Set<recipe_id>
+  const savedIds = new Map<string, Set<string>>()
   for (const s of rawSaves ?? []) {
     if (!savedIds.has(s.category_id)) savedIds.set(s.category_id, new Set())
     savedIds.get(s.category_id)!.add(s.recipe_id)
   }
 
   const withStats = categories.map((cat) => {
-    // Union des IDs natifs + sauvegardés (dédupliqués)
     const allIds = new Set([
       ...(nativeIds.get(cat.id) ?? []),
       ...(savedIds.get(cat.id) ?? []),
@@ -59,8 +56,9 @@ export default async function HomePage() {
     }
   })
 
-  const publicCategories = withStats.filter((c) => c.is_public)
-  const privateCategories = withStats.filter((c) => !c.is_public && c.author_id === user?.id)
+  const publicCategories  = withStats.filter((c) => c.visibility === 'public')
+  const privateCategories = withStats.filter((c) => c.visibility === 'private' && c.author_id === user?.id)
+  const sharedCategories  = withStats.filter((c) => c.visibility === 'shared'  && c.author_id !== user?.id)
 
   return (
     <div className="min-h-svh pb-24">
@@ -87,9 +85,9 @@ export default async function HomePage() {
         <CategoryGrid
           publicCategories={publicCategories}
           privateCategories={privateCategories}
+          sharedCategories={sharedCategories}
         />
       </main>
-
     </div>
   )
 }

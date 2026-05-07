@@ -2,7 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import type { CategoryVisibility } from '@/lib/types'
 
 async function getDb() {
   const supabase = await createClient()
@@ -19,18 +21,17 @@ export async function createCategory(formData: FormData) {
   const name = (formData.get('name') as string)?.trim()
   if (!name) return { error: 'Le nom est obligatoire.' }
 
-  // Garantir que le profil existe (sécurité si le trigger n'a pas fonctionné)
   await supabase.from('profiles').upsert(
     { id: user.id, full_name: user.user_metadata?.full_name ?? null },
     { onConflict: 'id', ignoreDuplicates: true },
   )
 
-  const isPublic = formData.get('is_public') === 'true'
+  const visibility = (formData.get('visibility') as CategoryVisibility) ?? 'private'
   const coverUrl = (formData.get('cover_image_url') as string)?.trim() || null
 
   const { data, error } = await supabase
     .from('categories')
-    .insert({ author_id: user.id, name, is_public: isPublic, cover_image_url: coverUrl })
+    .insert({ author_id: user.id, name, visibility, cover_image_url: coverUrl })
     .select('id')
     .single()
 
@@ -45,12 +46,12 @@ export async function updateCategory(id: string, formData: FormData) {
   const name = (formData.get('name') as string)?.trim()
   if (!name) return { error: 'Le nom est obligatoire.' }
 
-  const isPublic = formData.get('is_public') === 'true'
+  const visibility = (formData.get('visibility') as CategoryVisibility) ?? 'private'
   const coverUrl = (formData.get('cover_image_url') as string)?.trim() || null
 
   const { error } = await supabase
     .from('categories')
-    .update({ name, is_public: isPublic, cover_image_url: coverUrl })
+    .update({ name, visibility, cover_image_url: coverUrl })
     .eq('id', id)
 
   if (error) return { error: error.message }
@@ -63,4 +64,34 @@ export async function deleteCategory(id: string) {
   const { error } = await supabase.from('categories').delete().eq('id', id)
   if (error) return { error: error.message }
   redirect('/')
+}
+
+export async function addCategoryMember(categoryId: string, userId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté' }
+
+  const { error } = await supabase
+    .from('category_members')
+    .insert({ category_id: categoryId, user_id: userId })
+
+  if (error) return { error: error.message }
+  revalidatePath(`/categories/${categoryId}/edit`)
+  return { error: null }
+}
+
+export async function removeCategoryMember(categoryId: string, userId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté' }
+
+  const { error } = await supabase
+    .from('category_members')
+    .delete()
+    .eq('category_id', categoryId)
+    .eq('user_id', userId)
+
+  if (error) return { error: error.message }
+  revalidatePath(`/categories/${categoryId}/edit`)
+  return { error: null }
 }

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Pencil, Globe, Lock, Plus } from 'lucide-react'
+import { ArrowLeft, Pencil, Globe, Lock, Users, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { RecipeCard } from '@/components/recipes/recipe-card'
@@ -23,7 +23,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const [{ data: category }, { data: allTags }] = await Promise.all([
     supabase
       .from('categories')
-      .select('id, author_id, name, is_public, cover_image_url, created_at')
+      .select('id, author_id, name, visibility, cover_image_url, created_at')
       .eq('id', id)
       .single(),
     supabase.from('tags').select('id, name, color').order('name'),
@@ -98,9 +98,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           </Link>
           <div className="flex items-center gap-1.5 ml-1">
             <h1 className="font-semibold">{cat.name}</h1>
-            {cat.is_public
-              ? <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-              : <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+            {cat.visibility === 'public'  && <Globe  className="h-3.5 w-3.5 text-muted-foreground" />}
+            {cat.visibility === 'shared'  && <Users  className="h-3.5 w-3.5 text-muted-foreground" />}
+            {cat.visibility === 'private' && <Lock   className="h-3.5 w-3.5 text-muted-foreground" />}
           </div>
         </div>
         {isOwner && (

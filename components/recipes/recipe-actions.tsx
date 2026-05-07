@@ -129,8 +129,8 @@ export function RecipeActions({ recipeId, initialLiked, userCategories }: Props)
 
     const { data, error } = await supabase
       .from('categories')
-      .insert({ author_id: user.id, name: newName.trim(), is_public: newIsPublic })
-      .select('id, author_id, name, is_public, cover_image_url, created_at')
+      .insert({ author_id: user.id, name: newName.trim(), visibility: 'private' })
+      .select('id, author_id, name, visibility, cover_image_url, created_at')
       .single()
 
     if (error || !data) {
@@ -197,7 +197,7 @@ export function RecipeActions({ recipeId, initialLiked, userCategories }: Props)
                             {selected && <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />}
                           </span>
                           <span className="text-sm font-medium flex-1">{cat.name}</span>
-                          {cat.is_public
+                          {cat.visibility === 'public'
                             ? <Globe className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                             : <Lock className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />}
                         </button>

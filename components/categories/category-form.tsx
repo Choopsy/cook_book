@@ -1,23 +1,29 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Globe, Lock } from 'lucide-react'
+import { Globe, Lock, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImagePicker } from '@/components/recipes/image-picker'
 import { createCategory, updateCategory, deleteCategory } from '@/actions/categories'
-import type { Category } from '@/lib/types'
+import type { Category, CategoryVisibility } from '@/lib/types'
 
 interface Props {
   initialData?: Category
 }
 
+const VISIBILITY_OPTIONS: { value: CategoryVisibility; icon: React.ElementType; label: string; description: string }[] = [
+  { value: 'private',  icon: Lock,  label: 'Privée',    description: 'Visible uniquement par toi' },
+  { value: 'shared',   icon: Users, label: 'Partagée',  description: 'Visible par les amis invités' },
+  { value: 'public',   icon: Globe, label: 'Publique',  description: 'Visible par tous les membres' },
+]
+
 export function CategoryForm({ initialData }: Props) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState(initialData?.name ?? '')
-  const [isPublic, setIsPublic] = useState(initialData?.is_public ?? false)
+  const [visibility, setVisibility] = useState<CategoryVisibility>(initialData?.visibility ?? 'private')
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_image_url ?? '')
 
   const handleSubmit = () => {
@@ -25,7 +31,7 @@ export function CategoryForm({ initialData }: Props) {
     setError(null)
     const fd = new FormData()
     fd.set('name', name.trim())
-    fd.set('is_public', String(isPublic))
+    fd.set('visibility', visibility)
     fd.set('cover_image_url', coverUrl)
 
     startTransition(async () => {
@@ -38,9 +44,7 @@ export function CategoryForm({ initialData }: Props) {
 
   const handleDelete = () => {
     if (!initialData) return
-    startTransition(async () => {
-      await deleteCategory(initialData.id)
-    })
+    startTransition(async () => { await deleteCategory(initialData.id) })
   }
 
   return (
@@ -61,50 +65,33 @@ export function CategoryForm({ initialData }: Props) {
         />
       </div>
 
-      {/* Visibilité */}
       <div className="space-y-2">
         <Label>Visibilité</Label>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => setIsPublic(false)}
-            className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-colors ${
-              !isPublic ? 'border-foreground bg-muted' : 'border-border'
-            }`}
-          >
-            <Lock className="h-5 w-5" />
-            <div className="text-center">
-              <p className="text-sm font-semibold">Privée</p>
-              <p className="text-xs text-muted-foreground leading-snug mt-0.5">
-                Visible uniquement par toi
-              </p>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPublic(true)}
-            className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-colors ${
-              isPublic ? 'border-foreground bg-muted' : 'border-border'
-            }`}
-          >
-            <Globe className="h-5 w-5" />
-            <div className="text-center">
-              <p className="text-sm font-semibold">Publique</p>
-              <p className="text-xs text-muted-foreground leading-snug mt-0.5">
-                Visible par tous les membres
-              </p>
-            </div>
-          </button>
+        <div className="grid grid-cols-3 gap-2">
+          {VISIBILITY_OPTIONS.map(({ value, icon: Icon, label, description }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setVisibility(value)}
+              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-colors ${
+                visibility === value ? 'border-foreground bg-muted' : 'border-border'
+              }`}
+            >
+              <Icon className="h-5 w-5" />
+              <div className="text-center">
+                <p className="text-sm font-semibold">{label}</p>
+                <p className="text-xs text-muted-foreground leading-snug mt-0.5">{description}</p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Image */}
       <div className="space-y-2">
         <Label>Image de couverture</Label>
         <ImagePicker value={coverUrl} onChange={setCoverUrl} />
       </div>
 
-      {/* Actions */}
       <div className="flex gap-3 pt-2">
         {initialData && (
           <Button
@@ -117,12 +104,7 @@ export function CategoryForm({ initialData }: Props) {
             Supprimer
           </Button>
         )}
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isPending}
-          className="flex-1"
-        >
+        <Button type="button" onClick={handleSubmit} disabled={isPending} className="flex-1">
           {initialData ? 'Enregistrer' : 'Créer la catégorie'}
         </Button>
       </div>

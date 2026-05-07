@@ -49,7 +49,7 @@ export default async function RecipeDetailPage({ params }: Props) {
     // Catégories de l'utilisateur (pour le panneau de sauvegarde)
     user
       ? supabase.from('categories')
-          .select('id, author_id, name, is_public, cover_image_url, created_at')
+          .select('id, author_id, name, visibility, cover_image_url, created_at')
           .eq('author_id', user.id)
           .order('name')
       : Promise.resolve({ data: [] }),

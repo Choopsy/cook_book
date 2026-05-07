@@ -1,4 +1,5 @@
 export type Difficulty = 'easy' | 'medium' | 'hard'
+export type CategoryVisibility = 'public' | 'private' | 'shared'
 
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   easy: 'Facile',
@@ -10,9 +11,19 @@ export interface Category {
   id: string
   author_id: string
   name: string
-  is_public: boolean
+  visibility: CategoryVisibility
   cover_image_url: string | null
   created_at: string
+}
+
+export interface Friendship {
+  id: string
+  requester_id: string
+  addressee_id: string
+  status: 'pending' | 'accepted'
+  created_at: string
+  requester?: { full_name: string | null; avatar_url: string | null }
+  addressee?: { full_name: string | null; avatar_url: string | null }
 }
 
 export interface Tag {

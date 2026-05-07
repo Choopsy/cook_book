@@ -18,18 +18,18 @@ export default async function NewRecipePage({ searchParams }: Props) {
   const db = isAdmin ? createAdminClient() : supabase
 
   const allCatsQuery = db.from('categories')
-    .select('id, author_id, name, is_public, cover_image_url, created_at').order('name')
+    .select('id, author_id, name, visibility, cover_image_url, created_at').order('name')
 
   const [{ data: tags }, { data: profile }, { data: allCats }] = await Promise.all([
     supabase.from('tags').select('id, name, color').order('name'),
     supabase.from('profiles').select('can_contribute').eq('id', user?.id ?? '').maybeSingle(),
-    isAdmin ? allCatsQuery : allCatsQuery.or(`author_id.eq.${user?.id ?? ''},is_public.eq.true`),
+    isAdmin ? allCatsQuery : allCatsQuery.or(`author_id.eq.${user?.id ?? ''},visibility.eq.public`),
   ])
 
   const canContribute = profile?.can_contribute ?? false
   const categories = isAdmin
     ? (allCats ?? [])
-    : (allCats ?? []).filter((c) => c.author_id === user?.id || (c.is_public && canContribute))
+    : (allCats ?? []).filter((c) => c.author_id === user?.id || (c.visibility === 'public' && canContribute) || c.visibility === 'shared')
 
   return (
     <div className="min-h-svh">

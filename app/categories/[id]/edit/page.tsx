@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { CategoryForm } from '@/components/categories/category-form'
+import { CategoryMemberManager } from '@/components/categories/category-member-manager'
 import type { Category } from '@/lib/types'
 
 interface Props {
@@ -20,11 +21,43 @@ export default async function EditCategoryPage({ params }: Props) {
 
   const { data } = await db
     .from('categories')
-    .select('id, author_id, name, is_public, cover_image_url, created_at')
+    .select('id, author_id, name, visibility, cover_image_url, created_at')
     .eq('id', id)
     .single()
 
   if (!data) notFound()
+
+  const category = data as Category
+
+  // Pour les catégories partagées, charger membres + amis
+  let members: { id: string; full_name: string | null; avatar_url: string | null }[] = []
+  let friends: { id: string; full_name: string | null; avatar_url: string | null }[] = []
+
+  if (category.visibility === 'shared' && user) {
+    const [{ data: rawMembers }, { data: rawFriendships }] = await Promise.all([
+      supabase
+        .from('category_members')
+        .select('user_id, profiles!user_id(id, full_name, avatar_url)')
+        .eq('category_id', id),
+      supabase
+        .from('friendships')
+        .select(`
+          id, requester_id, addressee_id,
+          requester:profiles!requester_id(id, full_name, avatar_url),
+          addressee:profiles!addressee_id(id, full_name, avatar_url)
+        `)
+        .eq('status', 'accepted'),
+    ])
+
+    members = (rawMembers ?? []).map((m: any) => m.profiles).filter(Boolean)
+    const memberIds = new Set(members.map((m) => m.id))
+
+    const allFriendships = (rawFriendships ?? []) as any[]
+    friends = allFriendships
+      .map((f) => f.requester_id === user.id ? f.addressee : f.requester)
+      .filter(Boolean)
+      .filter((f: any) => !memberIds.has(f.id))
+  }
 
   return (
     <div className="min-h-svh">
@@ -36,8 +69,16 @@ export default async function EditCategoryPage({ params }: Props) {
         </Link>
         <h1 className="font-semibold">Modifier la catégorie</h1>
       </header>
-      <main className="px-4 py-6 max-w-lg mx-auto">
-        <CategoryForm initialData={data as Category} />
+      <main className="px-4 py-6 max-w-lg mx-auto space-y-8">
+        <CategoryForm initialData={category} />
+
+        {category.visibility === 'shared' && (
+          <CategoryMemberManager
+            categoryId={id}
+            members={members}
+            availableFriends={friends}
+          />
+        )}
       </main>
     </div>
   )

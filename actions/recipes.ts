@@ -31,7 +31,7 @@ export async function createRecipe(input: CreateRecipeInput) {
     } else {
       const { data: created } = await supabase
         .from('categories')
-        .insert({ author_id: user.id, name: 'Mes recettes', is_public: false })
+        .insert({ author_id: user.id, name: 'Mes recettes', visibility: 'private' })
         .select('id')
         .single()
       categoryId = created?.id ?? null
