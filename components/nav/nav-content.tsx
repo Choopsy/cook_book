@@ -58,6 +58,15 @@ export function NavContent({ isAdmin, avatarUrl, fullName }: Props) {
           </Link>
         </div>
 
+        {isAdmin && (
+          <Link href="/admin">
+            <Button variant={isActive('/admin') ? 'secondary' : 'ghost'} size="sm" className="gap-1.5">
+              <Settings className="h-4 w-4" />
+              Admin
+            </Button>
+          </Link>
+        )}
+
         <Link href="/profile">
           <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             {avatarUrl ? (
