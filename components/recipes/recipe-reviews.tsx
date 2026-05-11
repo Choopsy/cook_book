@@ -4,6 +4,11 @@ import { useState, useTransition } from 'react'
 import { Star, Trash2, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { upsertReview, deleteReview } from '@/actions/reviews'
 import type { Review } from '@/lib/types'
 
@@ -83,9 +88,28 @@ function ReviewForm({ recipeId, myReview }: { recipeId: string; myReview: Review
           {isPending ? 'Envoi…' : myReview ? 'Modifier' : 'Publier'}
         </Button>
         {myReview && (
-          <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={isPending}>
-            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button type="button" variant="ghost" size="sm" disabled={isPending}>
+                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Supprimer ton avis ?</AlertDialogTitle>
+                <AlertDialogDescription>Cette action est irréversible.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={handleDelete}
+                >
+                  Supprimer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </form>

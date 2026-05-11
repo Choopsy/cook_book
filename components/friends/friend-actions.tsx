@@ -4,6 +4,10 @@ import { useTransition } from 'react'
 import { Check, X, UserMinus, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
   sendFriendRequest,
   acceptFriendRequest,
   declineFriendRequest,
@@ -45,45 +49,87 @@ export function FriendActions(props: Props) {
         >
           <Check className="h-4 w-4" />
         </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-          disabled={isPending}
-          onClick={() => startTransition(async () => { await declineFriendRequest(props.friendshipId) })}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              disabled={isPending}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Refuser cette demande d&apos;ami ?</AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => startTransition(async () => { await declineFriendRequest(props.friendshipId) })}
+              >
+                Refuser
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     )
   }
 
   if (props.type === 'outgoing') {
     return (
-      <Button
-        size="sm"
-        variant="ghost"
-        className="text-muted-foreground"
-        disabled={isPending}
-        onClick={() => startTransition(async () => { await cancelFriendRequest(props.friendshipId) })}
-      >
-        Annuler
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button size="sm" variant="ghost" className="text-muted-foreground" disabled={isPending}>
+            Annuler
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annuler la demande d&apos;ami ?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Non</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => startTransition(async () => { await cancelFriendRequest(props.friendshipId) })}
+            >
+              Annuler la demande
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     )
   }
 
   return (
-    <Button
-      size="icon"
-      variant="ghost"
-      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-      disabled={isPending}
-      onClick={() => {
-        if (!confirm('Supprimer cet ami ?')) return
-        startTransition(async () => { await removeFriend(props.friendshipId) })
-      }}
-    >
-      <UserMinus className="h-4 w-4" />
-    </Button>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+          disabled={isPending}
+        >
+          <UserMinus className="h-4 w-4" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Supprimer cet ami ?</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => startTransition(async () => { await removeFriend(props.friendshipId) })}
+          >
+            Supprimer
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

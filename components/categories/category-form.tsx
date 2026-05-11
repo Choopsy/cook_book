@@ -6,6 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImagePicker } from '@/components/recipes/image-picker'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { createCategory, updateCategory, deleteCategory } from '@/actions/categories'
 import type { Category } from '@/lib/types'
 
@@ -174,15 +179,35 @@ export function CategoryForm({ initialData, availableFriends = [], initialMember
 
       <div className="flex gap-3 pt-2">
         {initialData && (
-          <Button
-            type="button"
-            variant="outline"
-            className="text-destructive border-destructive/30 hover:bg-destructive/5"
-            onClick={handleDelete}
-            disabled={isPending}
-          >
-            Supprimer
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                disabled={isPending}
+              >
+                Supprimer
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Supprimer cette catégorie ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Les recettes de la catégorie seront dissociées mais pas supprimées. Cette action est irréversible.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={handleDelete}
+                >
+                  Supprimer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
         <Button type="button" onClick={handleSubmit} disabled={isPending} className="flex-1">
           {initialData ? 'Enregistrer' : 'Créer la catégorie'}
