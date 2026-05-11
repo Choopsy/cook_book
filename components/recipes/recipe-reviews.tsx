@@ -5,7 +5,7 @@ import { Star, Trash2, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialog, AlertDialogCancel, AlertDialogClose, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
@@ -89,10 +89,10 @@ function ReviewForm({ recipeId, myReview }: { recipeId: string; myReview: Review
         </Button>
         {myReview && (
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" disabled={isPending}>
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
+            <AlertDialogTrigger
+              render={<Button type="button" variant="ghost" size="sm" disabled={isPending} />}
+            >
+              <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -101,12 +101,12 @@ function ReviewForm({ recipeId, myReview }: { recipeId: string; myReview: Review
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction
+                <AlertDialogClose
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   onClick={handleDelete}
                 >
                   Supprimer
-                </AlertDialogAction>
+                </AlertDialogClose>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

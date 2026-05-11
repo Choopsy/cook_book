@@ -4,7 +4,7 @@ import { useTransition } from 'react'
 import { Check, X, UserMinus, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialog, AlertDialogCancel, AlertDialogClose, AlertDialogContent,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import {
@@ -50,15 +50,17 @@ export function FriendActions(props: Props) {
           <Check className="h-4 w-4" />
         </Button>
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-              disabled={isPending}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <AlertDialogTrigger
+            render={
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                disabled={isPending}
+              />
+            }
+          >
+            <X className="h-4 w-4" />
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -66,12 +68,12 @@ export function FriendActions(props: Props) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction
+              <AlertDialogClose
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => startTransition(async () => { await declineFriendRequest(props.friendshipId) })}
               >
                 Refuser
-              </AlertDialogAction>
+              </AlertDialogClose>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -82,10 +84,10 @@ export function FriendActions(props: Props) {
   if (props.type === 'outgoing') {
     return (
       <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button size="sm" variant="ghost" className="text-muted-foreground" disabled={isPending}>
-            Annuler
-          </Button>
+        <AlertDialogTrigger
+          render={<Button size="sm" variant="ghost" className="text-muted-foreground" disabled={isPending} />}
+        >
+          Annuler
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -93,11 +95,11 @@ export function FriendActions(props: Props) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Non</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogClose
               onClick={() => startTransition(async () => { await cancelFriendRequest(props.friendshipId) })}
             >
               Annuler la demande
-            </AlertDialogAction>
+            </AlertDialogClose>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -106,15 +108,17 @@ export function FriendActions(props: Props) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-          disabled={isPending}
-        >
-          <UserMinus className="h-4 w-4" />
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+            disabled={isPending}
+          />
+        }
+      >
+        <UserMinus className="h-4 w-4" />
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -122,12 +126,12 @@ export function FriendActions(props: Props) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction
+          <AlertDialogClose
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={() => startTransition(async () => { await removeFriend(props.friendshipId) })}
           >
             Supprimer
-          </AlertDialogAction>
+          </AlertDialogClose>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

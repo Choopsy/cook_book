@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImagePicker } from '@/components/recipes/image-picker'
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialog, AlertDialogCancel, AlertDialogClose, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
@@ -180,15 +180,17 @@ export function CategoryForm({ initialData, availableFriends = [], initialMember
       <div className="flex gap-3 pt-2">
         {initialData && (
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="text-destructive border-destructive/30 hover:bg-destructive/5"
-                disabled={isPending}
-              >
-                Supprimer
-              </Button>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                  disabled={isPending}
+                />
+              }
+            >
+              Supprimer
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -199,12 +201,12 @@ export function CategoryForm({ initialData, availableFriends = [], initialMember
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction
+                <AlertDialogClose
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   onClick={handleDelete}
                 >
                   Supprimer
-                </AlertDialogAction>
+                </AlertDialogClose>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

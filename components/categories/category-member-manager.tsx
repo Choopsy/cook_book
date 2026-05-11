@@ -5,7 +5,7 @@ import { User, UserMinus, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialog, AlertDialogCancel, AlertDialogClose, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
@@ -44,32 +44,34 @@ function MemberRow({ categoryId, profile, action }: { categoryId: string; profil
       </div>
       {action === 'remove' ? (
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-              disabled={isPending}
-            >
-              <UserMinus className="h-4 w-4" />
-            </Button>
+          <AlertDialogTrigger
+            render={
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                disabled={isPending}
+              />
+            }
+          >
+            <UserMinus className="h-4 w-4" />
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Retirer l'accès ?</AlertDialogTitle>
+              <AlertDialogTitle>Retirer l&apos;accès ?</AlertDialogTitle>
               <AlertDialogDescription>
                 {profile.full_name ?? 'Cet utilisateur'} n&apos;aura plus accès à cette catégorie.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction
+              <AlertDialogClose
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => startTransition(async () => { await removeCategoryMember(categoryId, profile.id) })}
               >
                 Retirer
-              </AlertDialogAction>
+              </AlertDialogClose>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
