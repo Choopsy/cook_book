@@ -57,7 +57,7 @@ export default async function HomePage() {
   })
 
   const publicCategories  = withStats.filter((c) => c.visibility === 'public')
-  const privateCategories = withStats.filter((c) => c.visibility === 'private' && c.author_id === user?.id)
+  const privateCategories = withStats.filter((c) => c.author_id === user?.id && c.visibility !== 'public')
   const sharedCategories  = withStats.filter((c) => c.visibility === 'shared'  && c.author_id !== user?.id)
 
   return (

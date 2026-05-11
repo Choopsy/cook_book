@@ -106,13 +106,13 @@ export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }
               href={href}
               className="flex flex-col items-center gap-0.5 flex-1 py-2"
             >
-              <span className="relative">
+              <span className="relative inline-flex">
                 <Icon
                   className={`h-5 w-5 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
                   strokeWidth={active ? 2.5 : 1.5}
                 />
                 {href === '/friends' && pendingFriendsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 z-10 h-4 w-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
                     {pendingFriendsCount > 9 ? '9+' : pendingFriendsCount}
                   </span>
                 )}

@@ -97,7 +97,7 @@ export function CategoryGrid({ publicCategories, privateCategories, sharedCatego
         <>
           <Section title="Catégories publiques"      categories={filteredPublic}  icon={Globe} />
           <Section title="Partagées avec moi"        categories={filteredShared}  icon={Users} />
-          <Section title="Mes catégories privées"    categories={filteredPrivate} icon={Lock}  />
+          <Section title="Mes catégories"              categories={filteredPrivate} />
         </>
       )}
     </div>
