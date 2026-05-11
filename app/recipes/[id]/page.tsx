@@ -15,10 +15,12 @@ import type { RecipeDetail, Category, Review } from '@/lib/types'
 
 interface Props {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
 }
 
-export default async function RecipeDetailPage({ params }: Props) {
+export default async function RecipeDetailPage({ params, searchParams }: Props) {
   const { id } = await params
+  const { from } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -97,7 +99,7 @@ export default async function RecipeDetailPage({ params }: Props) {
   return (
     <div className="min-h-svh pb-8">
       <header className="sticky top-0 md:top-14 z-10 bg-background/80 backdrop-blur-sm border-b px-2 py-2 flex items-center justify-between">
-        <Link href={recipe.category_id ? `/categories/${recipe.category_id}` : '/'}>
+        <Link href={from ? `/categories/${from}` : recipe.category_id ? `/categories/${recipe.category_id}` : '/'}>
           <Button variant="ghost" size="icon" className="h-9 w-9">
             <ArrowLeft className="h-4 w-4" />
           </Button>

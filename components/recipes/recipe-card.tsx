@@ -4,11 +4,12 @@ import { Badge } from '@/components/ui/badge'
 import { DifficultyBadge } from './difficulty-badge'
 import type { RecipeSummary } from '@/lib/types'
 
-export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
+export function RecipeCard({ recipe, fromCategoryId }: { recipe: RecipeSummary; fromCategoryId?: string }) {
   const totalTime = (recipe.prep_time_min ?? 0) + (recipe.cook_time_min ?? 0)
+  const href = fromCategoryId ? `/recipes/${recipe.id}?from=${fromCategoryId}` : `/recipes/${recipe.id}`
 
   return (
-    <Link href={`/recipes/${recipe.id}`} className="group block">
+    <Link href={href} className="group block">
       <div className="rounded-xl overflow-hidden border bg-card shadow-sm transition-shadow group-hover:shadow-md">
         <div className="aspect-[4/3] relative bg-muted flex items-center justify-center overflow-hidden">
           {recipe.cover_image_url ? (

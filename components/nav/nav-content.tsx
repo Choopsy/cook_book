@@ -108,17 +108,15 @@ export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }
             >
               <span className="relative inline-flex">
                 <Icon
-                  className={`h-5 w-5 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
+                  className={`h-5 w-5 transition-colors ${href === '/friends' && pendingFriendsCount > 0 ? 'text-red-500' : active ? 'text-primary' : 'text-muted-foreground'}`}
                   strokeWidth={active ? 2.5 : 1.5}
                 />
-                {href === '/friends' && pendingFriendsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 z-10 h-4 w-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
-                    {pendingFriendsCount > 9 ? '9+' : pendingFriendsCount}
-                  </span>
-                )}
               </span>
-              <span className={`text-[10px] font-medium transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+              <span className={`text-[10px] font-medium transition-colors flex items-center gap-0.5 ${href === '/friends' && pendingFriendsCount > 0 ? 'text-red-500' : active ? 'text-primary' : 'text-muted-foreground'}`}>
                 {label}
+                {href === '/friends' && pendingFriendsCount > 0 && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                )}
               </span>
             </Link>
           )

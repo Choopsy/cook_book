@@ -135,7 +135,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {recipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard key={recipe.id} recipe={recipe} fromCategoryId={id} />
             ))}
           </div>
         )}
