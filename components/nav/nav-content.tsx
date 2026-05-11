@@ -34,7 +34,7 @@ export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }
       <nav className="hidden md:flex fixed top-0 left-0 right-0 z-40 h-14 bg-background/90 backdrop-blur-sm border-b items-center px-6 gap-4">
         <Link href="/" className="flex items-center gap-2 font-bold shrink-0 mr-2">
           <ChefHat className="h-5 w-5 text-primary" />
-          Carnet de famille
+          Lignée Gourmande
         </Link>
 
         <div className="flex items-center gap-1 flex-1">
