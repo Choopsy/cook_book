@@ -81,19 +81,7 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <div className="bg-gradient-to-br from-primary/15 via-accent/10 to-secondary px-4 pt-6 pb-8">
-        <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-            <ChefHat className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground leading-tight">Lignée Gourmande</h1>
-            <p className="text-sm text-muted-foreground">Toutes les recettes de la famille</p>
-          </div>
-        </div>
-      </div>
-
-      <main className="px-4 py-5 max-w-2xl mx-auto -mt-3">
+      <main className="px-4 py-4 max-w-2xl mx-auto">
         <CategoryGrid
           publicCategories={publicCategories}
           privateCategories={privateCategories}
