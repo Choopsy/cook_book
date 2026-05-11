@@ -61,11 +61,11 @@ export default async function HomePage() {
   const sharedCategories  = withStats.filter((c) => c.visibility === 'shared'  && c.author_id !== user?.id)
 
   return (
-    <div className="min-h-svh pb-24">
+    <div className="min-h-svh pb-24 bg-secondary">
       <header className="md:hidden sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ChefHat className="h-5 w-5 text-primary" />
-          <span className="font-bold">Carnet de famille</span>
+          <span className="font-bold">Lignée Gourmande</span>
         </div>
         <div className="flex items-center gap-1">
           <Link href="/favorites">
@@ -81,7 +81,19 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <main className="px-4 py-4 max-w-2xl mx-auto">
+      <div className="bg-gradient-to-br from-primary/15 via-accent/10 to-secondary px-4 pt-6 pb-8">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+            <ChefHat className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-foreground leading-tight">Lignée Gourmande</h1>
+            <p className="text-sm text-muted-foreground">Toutes les recettes de la famille</p>
+          </div>
+        </div>
+      </div>
+
+      <main className="px-4 py-5 max-w-2xl mx-auto -mt-3">
         <CategoryGrid
           publicCategories={publicCategories}
           privateCategories={privateCategories}

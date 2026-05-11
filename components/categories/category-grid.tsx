@@ -54,7 +54,7 @@ function CategoryCard({ cat }: { cat: CategoryWithStats }) {
 function Section({ title, categories, icon: Icon }: { title: string; categories: CategoryWithStats[]; icon?: React.ElementType }) {
   if (categories.length === 0) return null
   return (
-    <div className="space-y-3">
+    <div className="bg-card rounded-2xl p-4 shadow-sm space-y-3">
       <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
         {Icon && <Icon className="h-3.5 w-3.5" />}
         {title}

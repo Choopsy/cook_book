@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Carnet de famille",
+  title: "Lignée Gourmande",
   description: "Les recettes de la famille",
 };
 
