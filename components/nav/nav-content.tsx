@@ -20,7 +20,6 @@ const BASE_ITEMS = [
   { href: '/friends', icon: Users, label: 'Amis' },
 ]
 
-const MOBILE_ITEMS = BASE_ITEMS.filter(i => i.href !== '/favorites')
 
 export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }: Props) {
   const pathname = usePathname()
@@ -102,7 +101,7 @@ export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-background/90 backdrop-blur-sm border-t flex items-center safe-area-inset-bottom">
         {/* Groupe gauche */}
         <div className="flex flex-1 items-center justify-around">
-          {MOBILE_ITEMS.map(({ href, icon: Icon, label }) => {
+          {BASE_ITEMS.map(({ href, icon: Icon, label }) => {
             const active = isActive(href)
             return (
               <Link

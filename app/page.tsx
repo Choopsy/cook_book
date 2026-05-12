@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ChefHat, Heart } from 'lucide-react'
+import { ChefHat } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
@@ -68,11 +68,6 @@ export default async function HomePage() {
           <span className="font-bold">Lignée Gourmande</span>
         </div>
         <div className="flex items-center gap-1">
-          <Link href="/favorites">
-            <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Recettes aimées">
-              <Heart className="h-4 w-4" />
-            </Button>
-          </Link>
           <form action={signOut}>
             <Button variant="ghost" size="sm" type="submit" className="text-muted-foreground text-xs">
               Déconnexion
