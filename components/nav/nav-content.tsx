@@ -20,6 +20,8 @@ const BASE_ITEMS = [
   { href: '/friends', icon: Users, label: 'Amis' },
 ]
 
+const MOBILE_ITEMS = BASE_ITEMS.filter(i => i.href !== '/favorites')
+
 export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }: Props) {
   const pathname = usePathname()
 
@@ -97,50 +99,59 @@ export function NavContent({ isAdmin, avatarUrl, fullName, pendingFriendsCount }
       </nav>
 
       {/* ── Mobile : barre du bas ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-background/90 backdrop-blur-sm border-t flex items-center justify-around safe-area-inset-bottom">
-        {items.map(({ href, icon: Icon, label }) => {
-          const active = isActive(href)
-          return (
-            <Link
-              key={href}
-              href={href}
-              className="flex flex-col items-center gap-0.5 flex-1 py-2"
-            >
-              <span className="relative inline-flex">
-                <Icon
-                  className={`h-5 w-5 transition-colors ${href === '/friends' && pendingFriendsCount > 0 ? 'text-red-500' : active ? 'text-primary' : 'text-muted-foreground'}`}
-                  strokeWidth={active ? 2.5 : 1.5}
-                />
-              </span>
-              <span className={`text-[10px] font-medium transition-colors flex items-center gap-0.5 ${href === '/friends' && pendingFriendsCount > 0 ? 'text-red-500' : active ? 'text-primary' : 'text-muted-foreground'}`}>
-                {label}
-                {href === '/friends' && pendingFriendsCount > 0 && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-                )}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-background/90 backdrop-blur-sm border-t flex items-center safe-area-inset-bottom">
+        {/* Groupe gauche */}
+        <div className="flex flex-1 items-center justify-around">
+          {MOBILE_ITEMS.map(({ href, icon: Icon, label }) => {
+            const active = isActive(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="flex flex-col items-center gap-0.5 py-2 px-3"
+              >
+                <span className="relative inline-flex">
+                  <Icon
+                    className={`h-5 w-5 transition-colors ${href === '/friends' && pendingFriendsCount > 0 ? 'text-red-500' : active ? 'text-primary' : 'text-muted-foreground'}`}
+                    strokeWidth={active ? 2.5 : 1.5}
+                  />
+                </span>
+                <span className={`text-[10px] font-medium transition-colors flex items-center gap-0.5 ${href === '/friends' && pendingFriendsCount > 0 ? 'text-red-500' : active ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {label}
+                  {href === '/friends' && pendingFriendsCount > 0 && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                  )}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Centre : bouton création */}
+        <NewItemSheet />
+
+        {/* Groupe droite */}
+        <div className="flex flex-1 items-center justify-around">
+          <Link href="/profile" className="flex flex-col items-center gap-0.5 py-2 px-3">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+            ) : (
+              <User className={`h-5 w-5 transition-colors ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`} strokeWidth={isActive('/profile') ? 2.5 : 1.5} />
+            )}
+            <span className={`text-[10px] font-medium transition-colors ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>Profil</span>
+          </Link>
+          {isAdmin && (
+            <Link href="/admin" className="flex flex-col items-center gap-0.5 py-2 px-3">
+              <Settings
+                className={`h-5 w-5 transition-colors ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}
+                strokeWidth={isActive('/admin') ? 2.5 : 1.5}
+              />
+              <span className={`text-[10px] font-medium transition-colors ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}>
+                Admin
               </span>
             </Link>
-          )
-        })}
-        <NewItemSheet />
-        <Link href="/profile" className="flex flex-col items-center gap-0.5 flex-1 py-2">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
-          ) : (
-            <User className={`h-5 w-5 transition-colors ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`} strokeWidth={isActive('/profile') ? 2.5 : 1.5} />
           )}
-          <span className={`text-[10px] font-medium transition-colors ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>Profil</span>
-        </Link>
-        {isAdmin && (
-          <Link href="/admin" className="flex flex-col items-center gap-0.5 flex-1 py-2">
-            <Settings
-              className={`h-5 w-5 transition-colors ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}
-              strokeWidth={isActive('/admin') ? 2.5 : 1.5}
-            />
-            <span className={`text-[10px] font-medium transition-colors ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground'}`}>
-              Admin
-            </span>
-          </Link>
-        )}
+        </div>
       </nav>
     </>
   )

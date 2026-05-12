@@ -19,7 +19,7 @@ export function NewItemSheet() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center gap-0.5 flex-1 py-2"
+        className="flex flex-col items-center gap-0.5 py-2 px-3"
       >
         <span className="flex items-center justify-center h-9 w-9 rounded-full bg-primary/90 transition-colors">
           <PlusCircle className="h-5 w-5 text-primary-foreground" strokeWidth={2} />
