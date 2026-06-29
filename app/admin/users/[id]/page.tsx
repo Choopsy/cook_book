@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { DeleteItemButton } from '@/components/admin/delete-item-button'
+import { ChangePasswordForm } from '@/components/admin/change-password-form'
 import { deleteRecipeAdmin, deleteCategoryAdmin, deleteReviewAdmin } from '@/actions/admin'
 
 interface Props {
@@ -53,6 +54,8 @@ export default async function AdminUserPage({ params }: Props) {
       </header>
 
       <div className="px-4 py-5 max-w-2xl mx-auto space-y-6">
+
+        <ChangePasswordForm userId={id} />
 
         {/* Recettes */}
         <section className="space-y-2">

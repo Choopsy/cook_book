@@ -61,3 +61,15 @@ export async function deleteReviewAdmin(userId: string, reviewId: string) {
   revalidatePath(`/admin/users/${userId}`)
   redirect(`/admin/users/${userId}`)
 }
+
+export async function resetUserPassword(userId: string, _prevState: { error?: string; success?: boolean }, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  await assertAdmin()
+  const password = formData.get('password') as string
+  const confirm = formData.get('confirm') as string
+  if (password.length < 8) return { error: 'Le mot de passe doit faire au moins 8 caractères.' }
+  if (password !== confirm) return { error: 'Les mots de passe ne correspondent pas.' }
+  const admin = createAdminClient()
+  const { error } = await admin.auth.admin.updateUserById(userId, { password })
+  if (error) return { error: error.message }
+  return { success: true }
+}
